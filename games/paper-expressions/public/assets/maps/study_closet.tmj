@@ -1,0 +1,123 @@
+{
+  "compressionlevel": -1,
+  "height": 7,
+  "infinite": false,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tiledversion": "1.11.0",
+  "tileheight": 32,
+  "tilewidth": 32,
+  "type": "map",
+  "version": "1.10",
+  "width": 8,
+  "properties": [
+    { "name": "wallNorth", "type": "float", "value": 3.4 },
+    { "name": "wallSouth", "type": "float", "value": 0 },
+    { "name": "wallEast", "type": "float", "value": 3.4 },
+    { "name": "wallWest", "type": "float", "value": 3.4 },
+    { "name": "floorPrimaryColor", "type": "string", "value": "#dfd9e6" },
+    { "name": "floorSecondaryColor", "type": "string", "value": "#d5cde0" },
+    { "name": "wallColor", "type": "string", "value": "#c8d0de" },
+    { "name": "wallAccentColor", "type": "string", "value": "#aab5c8" }
+  ],
+  "layers": [
+    {
+      "id": 1,
+      "name": "floor",
+      "type": "tilelayer",
+      "width": 8,
+      "height": 7,
+      "visible": true,
+      "data": [
+        1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1
+      ]
+    },
+    {
+      "id": 2,
+      "name": "collision",
+      "type": "tilelayer",
+      "width": 8,
+      "height": 7,
+      "visible": true,
+      "data": [
+        0, 0, 0, 1, 1, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0
+      ]
+    },
+    {
+      "id": 3,
+      "name": "objects",
+      "type": "objectgroup",
+      "visible": true,
+      "objects": [
+        {
+          "id": 301,
+          "name": "spawn_entry",
+          "type": "spawn",
+          "x": 128,
+          "y": 176,
+          "properties": [
+            { "name": "facing", "type": "string", "value": "right" }
+          ]
+        },
+        {
+          "id": 302,
+          "name": "study_terminal",
+          "type": "trigger",
+          "x": 96,
+          "y": 0,
+          "width": 64,
+          "height": 34,
+          "properties": [
+            { "name": "triggerMode", "type": "string", "value": "interact" },
+            { "name": "scriptId", "type": "string", "value": "study_terminal" },
+            { "name": "label", "type": "string", "value": "label_study_terminal" },
+            { "name": "interactionRadius", "type": "float", "value": 1.6 }
+          ]
+        },
+        {
+          "id": 303,
+          "name": "return_door",
+          "type": "trigger",
+          "x": 96,
+          "y": 196,
+          "width": 64,
+          "height": 28,
+          "properties": [
+            { "name": "triggerMode", "type": "string", "value": "interact" },
+            { "name": "targetEnv", "type": "string", "value": "main_studio" },
+            { "name": "targetSpawnId", "type": "string", "value": "spawn_from_study" },
+            { "name": "label", "type": "string", "value": "label_return_door" },
+            { "name": "interactionRadius", "type": "float", "value": 1.5 }
+          ]
+        },
+        {
+          "id": 304,
+          "name": "terminal_glow",
+          "type": "light",
+          "x": 128,
+          "y": 36,
+          "properties": [
+            { "name": "lightType", "type": "string", "value": "point" },
+            { "name": "color", "type": "string", "value": "#79c8ff" },
+            { "name": "intensity", "type": "float", "value": 8 },
+            { "name": "heightY", "type": "float", "value": 1.8 },
+            { "name": "distance", "type": "float", "value": 9 },
+            { "name": "decay", "type": "float", "value": 1.7 }
+          ]
+        }
+      ]
+    }
+  ]
+}

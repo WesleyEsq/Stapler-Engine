@@ -1,0 +1,228 @@
+{
+  "compressionlevel": -1,
+  "height": 10,
+  "infinite": false,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tiledversion": "1.11.0",
+  "tileheight": 32,
+  "tilewidth": 32,
+  "type": "map",
+  "version": "1.10",
+  "width": 16,
+  "properties": [
+    { "name": "wallNorth", "type": "float", "value": 3.8 },
+    { "name": "wallSouth", "type": "float", "value": 0 },
+    { "name": "wallEast", "type": "float", "value": 3.8 },
+    { "name": "wallWest", "type": "float", "value": 3.8 },
+    { "name": "floorPrimaryColor", "type": "string", "value": "#ebe3d3" },
+    { "name": "floorSecondaryColor", "type": "string", "value": "#e2d9c6" },
+    { "name": "wallColor", "type": "string", "value": "#d7e0e5" },
+    { "name": "wallAccentColor", "type": "string", "value": "#bac8d0" }
+  ],
+  "layers": [
+    {
+      "id": 1,
+      "name": "floor",
+      "type": "tilelayer",
+      "width": 16,
+      "height": 10,
+      "visible": true,
+      "data": [
+        0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+      ]
+    },
+    {
+      "id": 2,
+      "name": "collision",
+      "type": "tilelayer",
+      "width": 16,
+      "height": 10,
+      "visible": true,
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ]
+    },
+    {
+      "id": 3,
+      "name": "interior_walls",
+      "type": "objectgroup",
+      "visible": true,
+      "objects": [
+        {
+          "id": 101,
+          "name": "study_divider_west",
+          "x": 332,
+          "y": 0,
+          "width": 10,
+          "height": 176,
+          "properties": [
+            { "name": "height", "type": "float", "value": 3.4 },
+            { "name": "doubleSided", "type": "bool", "value": true },
+            { "name": "castShadow", "type": "bool", "value": true }
+          ]
+        },
+        {
+          "id": 102,
+          "name": "study_half_wall_south",
+          "x": 332,
+          "y": 168,
+          "width": 76,
+          "height": 10,
+          "properties": [
+            { "name": "height", "type": "float", "value": 1.35 },
+            { "name": "doubleSided", "type": "bool", "value": true },
+            { "name": "castShadow", "type": "bool", "value": true }
+          ]
+        },
+        {
+          "id": 103,
+          "name": "void_corner_wall_east",
+          "x": 124,
+          "y": 0,
+          "width": 8,
+          "height": 96,
+          "properties": [
+            { "name": "height", "type": "float", "value": 3.8 },
+            { "name": "doubleSided", "type": "bool", "value": true },
+            { "name": "castShadow", "type": "bool", "value": true }
+          ]
+        },
+        {
+          "id": 104,
+          "name": "void_corner_wall_north",
+          "x": 0,
+          "y": 92,
+          "width": 132,
+          "height": 8,
+          "properties": [
+            { "name": "height", "type": "float", "value": 3.8 },
+            { "name": "doubleSided", "type": "bool", "value": true },
+            { "name": "castShadow", "type": "bool", "value": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "objects",
+      "type": "objectgroup",
+      "visible": true,
+      "objects": [
+        {
+          "id": 201,
+          "name": "spawn_start",
+          "type": "spawn",
+          "x": 208,
+          "y": 216,
+          "properties": [
+            { "name": "facing", "type": "string", "value": "right" }
+          ]
+        },
+        {
+          "id": 207,
+          "name": "spawn_from_study",
+          "type": "spawn",
+          "x": 420,
+          "y": 44,
+          "properties": [
+            { "name": "facing", "type": "string", "value": "left" }
+          ]
+        },
+        {
+          "id": 202,
+          "name": "hallway_threshold",
+          "type": "trigger",
+          "x": 144,
+          "y": 16,
+          "width": 80,
+          "height": 48,
+          "properties": [
+            { "name": "triggerMode", "type": "string", "value": "enter" },
+            { "name": "scriptId", "type": "string", "value": "hallway_notice" },
+            { "name": "label", "type": "string", "value": "label_hallway_exit" },
+            { "name": "oneShot", "type": "bool", "value": false }
+          ]
+        },
+        {
+          "id": 203,
+          "name": "study_door",
+          "type": "trigger",
+          "x": 416,
+          "y": 6,
+          "width": 44,
+          "height": 26,
+          "properties": [
+            { "name": "triggerMode", "type": "string", "value": "interact" },
+            { "name": "scriptId", "type": "string", "value": "study_door" },
+            { "name": "label", "type": "string", "value": "label_study_door" },
+            { "name": "interactionRadius", "type": "float", "value": 1.6 }
+          ]
+        },
+        {
+          "id": 204,
+          "name": "patrol_main_floor",
+          "type": "patrol",
+          "x": 144,
+          "y": 240,
+          "polyline": [
+            { "x": 0, "y": 0 },
+            { "x": 144, "y": 0 },
+            { "x": 144, "y": -96 }
+          ]
+        },
+        {
+          "id": 205,
+          "name": "lab_assistant",
+          "type": "npc",
+          "x": 144,
+          "y": 240,
+          "properties": [
+            { "name": "spriteId", "type": "string", "value": "assistant" },
+            { "name": "label", "type": "string", "value": "label_lab_assistant" },
+            { "name": "scriptId", "type": "string", "value": "assistant_greeting" },
+            { "name": "interactionRadius", "type": "float", "value": 1.55 },
+            { "name": "solidRadius", "type": "float", "value": 0.32 },
+            { "name": "patrolPath", "type": "string", "value": "patrol_main_floor" },
+            { "name": "patrolMode", "type": "string", "value": "pingpong" },
+            { "name": "moveSpeed", "type": "float", "value": 1.9 },
+            { "name": "waitAtWaypointSec", "type": "float", "value": 0.9 }
+          ]
+        },
+        {
+          "id": 206,
+          "name": "study_lamp_light",
+          "type": "light",
+          "x": 456,
+          "y": 90,
+          "properties": [
+            { "name": "lightType", "type": "string", "value": "point" },
+            { "name": "color", "type": "string", "value": "#ff9d5c" },
+            { "name": "intensity", "type": "float", "value": 9.5 },
+            { "name": "heightY", "type": "float", "value": 2.3 },
+            { "name": "distance", "type": "float", "value": 10 },
+            { "name": "decay", "type": "float", "value": 1.7 }
+          ]
+        }
+      ]
+    }
+  ]
+}

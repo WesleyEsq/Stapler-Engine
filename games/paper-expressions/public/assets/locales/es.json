@@ -1,0 +1,48 @@
+{
+  "ui": {
+    "pause_title": "Pausa",
+    "pause_resume": "Continuar",
+    "pause_tab_saves": "Guardar / Cargar",
+    "pause_tab_settings": "Ajustes",
+    "save_autosave": "Autoguardado",
+    "save_slot": "Ranura",
+    "save_empty": "Vacía",
+    "save_btn": "Guardar",
+    "load_btn": "Cargar",
+    "erase_btn": "Borrar",
+    "settings_language": "Idioma",
+    "settings_bgm": "Música (BGM)",
+    "settings_sfx": "Efectos (SFX)",
+    "settings_voice": "Voz",
+    "settings_mute": "Silenciar",
+    "settings_unmute": "Activar",
+    "dialogue_next": "Clic / Espacio ▸",
+    "loading_prefix": "Cargando",
+    "interact_prompt_prefix": "Espacio / Clic —",
+    "label_study_door": "Puerta del Estudio",
+    "label_return_door": "Volver al Estudio Principal",
+    "label_study_terminal": "Terminal de Diagnóstico",
+    "label_lab_assistant": "Asistente de Laboratorio",
+    "label_hallway_exit": "Umbral del Pasillo"
+  },
+  "environments": {
+    "env_main_studio": "Estudio Principal",
+    "env_study_closet": "Cuarto de Estudio"
+  },
+  "speakers": {
+    "unua": "Profesora Unua",
+    "assistant": "Asistente"
+  },
+  "lines": {
+    "assistant_intro_01": "¡Profesora! La terminal de diagnóstico dentro del cuarto de estudio volvió a parpadear.",
+    "unua_intro_02": "...Genial. Pasaré por la puerta del estudio para revisar los registros yo misma.",
+    "assistant_repeat_01": "La puerta del estudio está rodeando la pared interior a la derecha.",
+    "assistant_after_terminal_01": "¿Ya revisaste los registros de diagnóstico? ¡Todo está en verde!",
+    "unua_after_terminal_02": "Liberación de memoria limpia, cero fugas. Prueba guardar desde el menú de pausa (Esc).",
+    "study_door_enter": "Entrando al cuarto de estudio...",
+    "terminal_check_01": "Terminal de diagnóstico: liberación de escena e IndexedDB operando normalmente.",
+    "terminal_check_02": "Bandera [checked_terminal] activada. Volvamos a avisar al asistente.",
+    "hallway_not_ready_01": "Mejor reviso la terminal en el cuarto de estudio antes de salir al pasillo.",
+    "hallway_ready_01": "¡Todos los sistemas verificados! Todo listo para el prólogo completo de Paper expressions."
+  }
+}

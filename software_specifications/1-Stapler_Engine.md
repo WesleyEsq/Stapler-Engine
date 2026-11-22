@@ -71,6 +71,10 @@ The engine specializes in a very specific type of game: a hybrid between a visua
     * **Language:** Switches active locale across dialogs and UI.
     * **Audio:** Separate volume sliders and mute toggles for background music and sound effects (plus future voice volume).
 
+**13. Automated unit testing (critical-path, flakeless):** Maintains a lightweight, deterministic **Vitest** unit test suite running purely in Node (`environment: 'node'`, no headless browser or WebGL context required) focused on high-risk engine logic rather than chasing an arbitrary coverage percentage:
+    * Covers GPU resource disposal (`AssetManager`), lighting/shadow caps (`LightingRig`), camera clamping (`FixedCamera`), sprite animation/flip state (`PaperSprite`), `NavGrid`/AABB/NPC collisions, A* pathfinding and string-pulling, `.tmj` parsing, trigger/patrol logic, `.dlg` script parsing, localization fallback, mode FSM transitions, save-slot serialization, and a final game-content integrity test (verifying dialogue keys, scene transitions, and patrol references across assets).
+    * Deliberately skips brittle DOM/CSS layout, `WebGLRenderer`, `<canvas>` pixel output, and Web Audio hardware playback in unit tests to guarantee sub-second, zero-flake execution.
+
 ---
 
 ## The test game

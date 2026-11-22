@@ -1,0 +1,18 @@
+# scripts/assistant_greeting.dlg
+@portrait left unua default
+@portrait right assistant default
+
+@if checked_terminal == true
+  say assistant assistant_after_terminal_01
+  say unua unua_after_terminal_02
+@else
+  @if met_assistant == true
+    say assistant assistant_repeat_01
+  @else
+    say assistant assistant_intro_01
+    say unua unua_intro_02
+    @set met_assistant true
+  @endif
+@endif
+
+@end

@@ -41,6 +41,11 @@ like "three" or "@stapler/engine". Vite handles this in two modes:
     - Bundles everything into static HTML, JS, and CSS files in dist/ that can
       be hosted on any static web host with no backend server.
 
+  Unit Testing (Vitest in Node - npm test):
+    - Reuses Vite's TypeScript resolver with zero extra build step.
+    - Runs co-located *.test.ts files purely in Node (no DOM/WebGL browser
+      flakiness) to verify critical engine logic and game asset integrity.
+
 
 ## 3. Workspace Map
 
@@ -75,29 +80,27 @@ Specifications and planning:
 
 ## 4. Current Status: Implemented vs. Planned
 
-Implemented right now (Milestone 1 - Rendering & Movement Spike):
-- Strict TypeScript monorepo with Vite dev/build pipeline.
-- Scoped GPU resource tracking (AssetManager).
-- Responsive WebGL canvas + CSS --ui-scale calculation (ViewportManager).
-- SVG rasterization to high-DPI CanvasTexture (SvgTextureLoader).
-- 2D lit cutout sprites with silhouette shadows and flip tween (PaperSprite).
-- Configurable lighting rig with 2-shadow-caster limit and flat mode.
-- Fixed-angle camera with bounds, damped follow, and optional camera light.
-- Procedural greybox room builder (SimpleRoomBuilder) and basic WASD/click
-  movement (BasicMover).
+Implemented right now (Milestones 1, 2 & 3 - Complete Engine Core):
+- Strict TypeScript monorepo with Vite dev/build pipeline and Vitest Node-only
+  unit test suite.
+- Core runtime & transitions: EngineApp, ModeFsm, EventBus, GameState,
+  SceneManager (deterministic scene unload + VRAM disposal), AssetManager.
+- Rendering: ViewportManager (--ui-scale), SvgTextureLoader, PaperSprite
+  (alphaTest silhouette shadows, flip tween, multi-frame UV animations),
+  LightingRig (2-shadow cap + flat mode), FixedCamera, TileMapBuilder (.tmj
+  void floors + border & interior_walls), PropLoader (.glb), DebugOverlay.
+- Navigation & NPCs: NavGrid + 2D AABB/NPC circle colliders, 8-way A* Pathfinder
+  with radius-aware string-pulling, hybrid WASD/click MovementController,
+  walk-over & interactable triggers (InteractionSystem), idle/patrol NpcController.
+- Narrative, Audio, Persistence & UI: ScriptParser (.dlg with @if/@else, @set,
+  @transition, @wait), DialogueRunner, I18nStore (live en/es switching),
+  AudioManager (.opus/.mp3 + SfxConcurrencyLimiter), SaveManager (IndexedDB 10
+  slots + autosave + settings), and responsive HTML/CSS UIOverlay (DialogueView,
+  PauseMenuView, LoadingView).
 
-Planned next (Milestones 2 through 4, documented in 2-Architecture.md):
-- Milestone 2: Tiled (.tmj) map loader (including non-rectangular void floors
-  and interior_walls), multi-frame UV sprite animations, .glb 3D prop loader,
-  NavGrid + 2D AABB/NPC colliders with radius-aware A* pathfinding and collision
-  sliding, walk-over/interactable triggers with hover/proximity cues, NPC idle
-  and waypoint patrol paths, and a toggleable DebugOverlay.
-- Milestone 3: EngineApp/SceneManager lifecycle, dialogue script parser (.dlg
-  with @transition), localization JSON store, HTML visual novel overlay, Web
-  Audio manager (.opus/.mp3), and IndexedDB configurable save slots (default 10
-  + autosave).
-- Milestone 4: All 6 environments, characters, scripts, and audio for
-  Paper expressions.
+Planned next (Milestone 4, documented in 2-Architecture.md):
+- Milestone 4: All 6 environments, character SVGs, .glb props, .dlg scripts,
+  locale JSONs, and audio tracks for Paper expressions.
 
 
 ## 5. Reading Order for the Rest of docs/

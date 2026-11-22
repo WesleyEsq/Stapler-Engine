@@ -1,0 +1,48 @@
+{
+  "ui": {
+    "pause_title": "Paused",
+    "pause_resume": "Resume",
+    "pause_tab_saves": "Save / Load",
+    "pause_tab_settings": "Settings",
+    "save_autosave": "Autosave",
+    "save_slot": "Slot",
+    "save_empty": "Empty",
+    "save_btn": "Save",
+    "load_btn": "Load",
+    "erase_btn": "Erase",
+    "settings_language": "Language",
+    "settings_bgm": "Music (BGM)",
+    "settings_sfx": "Sound Effects (SFX)",
+    "settings_voice": "Voice",
+    "settings_mute": "Mute",
+    "settings_unmute": "Unmute",
+    "dialogue_next": "Click / Space ▸",
+    "loading_prefix": "Loading",
+    "interact_prompt_prefix": "Space / Click —",
+    "label_study_door": "Study Room Door",
+    "label_return_door": "Return to Main Studio",
+    "label_study_terminal": "Diagnostics Terminal",
+    "label_lab_assistant": "Lab Assistant",
+    "label_hallway_exit": "Hallway Threshold"
+  },
+  "environments": {
+    "env_main_studio": "Main Studio",
+    "env_study_closet": "Study Alcove"
+  },
+  "speakers": {
+    "unua": "Professor Unua",
+    "assistant": "Lab Assistant"
+  },
+  "lines": {
+    "assistant_intro_01": "Professor! The diagnostics terminal inside the study room is blinking again.",
+    "unua_intro_02": "...Great. I'll go through the study door and check the logs myself.",
+    "assistant_repeat_01": "The study door is just around the interior partition wall on the right.",
+    "assistant_after_terminal_01": "You pulled the diagnostics logs already? Everything looks green!",
+    "unua_after_terminal_02": "Clean memory disposal, zero leaks. Try saving from the Pause menu (Esc).",
+    "study_door_enter": "Heading into the study alcove...",
+    "terminal_check_01": "Diagnostics terminal: Scene transition disposal and IndexedDB storage nominal.",
+    "terminal_check_02": "Flag [checked_terminal] set to true. Let's report back to the assistant.",
+    "hallway_not_ready_01": "Better check the diagnostics terminal in the study room before heading out.",
+    "hallway_ready_01": "All systems verified! Ready for the full 6-room Paper expressions prologue."
+  }
+}

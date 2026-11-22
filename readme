@@ -19,7 +19,7 @@ A lightweight, decoupled **2.5D narrative point-and-click web game engine** buil
 - **2.5D Paper-Cutout Rendering:** SVG-authored characters rasterized to high-DPI textures on lit 3D planes with alpha-cutout silhouette shadows and optional `.glb` 3D props.
 - **Compact Tile Environments:** Fixed-camera rectangular environments (default budget up to `4,096` tiles / max dimension `64`) authored in Tiled (`.tmj`), with merged/chunked geometry, configurable wall heights + optional interior partitions, and configurable lights (capped at 2 shadow casters).
 - **Hybrid Controls & VN Overlay:** Grid A* point-and-click (with path smoothing) + WASD/keyboard controls paired with a localized HTML/CSS visual novel dialogue overlay.
-- **Web-First Discipline:** `.opus`/`.mp3` audio with Web Audio concurrency limits, `IndexedDB` configurable save slots (default 10 + autosave), and explicit Three.js GPU resource disposal across scene transitions.
+- **Web-First Discipline:** `.opus`/`.mp3` audio with Web Audio concurrency limits, `IndexedDB` configurable save slots (default 10 + autosave), explicit Three.js GPU resource disposal across scene transitions, and fast Node-only **Vitest** critical-path unit tests.
 
 ## Test Game: *Paper expressions*
 

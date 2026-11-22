@@ -30,6 +30,9 @@ npm install
 echo "==> Running TypeScript typecheck..."
 npm run typecheck
 
+echo "==> Running unit tests..."
+npm test
+
 echo "==> Running production build check..."
 npm run build
 

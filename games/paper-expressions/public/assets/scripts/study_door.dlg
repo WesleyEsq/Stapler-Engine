@@ -1,0 +1,5 @@
+# scripts/study_door.dlg
+@portrait left unua default
+say unua study_door_enter
+@transition study_closet spawn_entry right
+@end

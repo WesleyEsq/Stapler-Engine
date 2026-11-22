@@ -1,0 +1,6 @@
+# scripts/study_terminal.dlg
+@portrait center unua default
+say unua terminal_check_01
+@set checked_terminal true
+say unua terminal_check_02
+@end

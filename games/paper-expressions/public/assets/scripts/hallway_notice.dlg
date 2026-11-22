@@ -1,0 +1,8 @@
+# scripts/hallway_notice.dlg
+@portrait left unua default
+@if checked_terminal == true
+  say unua hallway_ready_01
+@else
+  say unua hallway_not_ready_01
+@endif
+@end

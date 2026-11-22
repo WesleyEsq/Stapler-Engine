@@ -12,6 +12,7 @@ Depends on: [1-Stapler_Engine.md](./1-Stapler_Engine.md)
 * **Language:** TypeScript (strict mode enabled)
 * **3D Renderer:** Three.js (WebGL2)
 * **Build Tooling:** Vite (workspace monorepo)
+* **Unit Testing:** Vitest (`environment: 'node'` — fast, deterministic, zero browser/WebGL flakiness)
 * **UI Layer:** Responsive HTML/CSS overlay (zero WebGL UI rendering)
 * **Audio:** Web Audio API (`.opus` primary, `.mp3` fallback)
 * **Persistence:** IndexedDB (configurable save slots + optional autosave + user settings)
@@ -22,6 +23,7 @@ Depends on: [1-Stapler_Engine.md](./1-Stapler_Engine.md)
 2. **Data-Driven Content:** Environments, lighting rigs, props, sprites, dialogues, and translations are loaded from external assets/configs rather than hardcoded in TypeScript classes.
 3. **Deterministic GPU & Audio Disposal:** Every resource is owned by `AssetManager` under either `persistent` or `scene` scope. Leaving an environment unconditionally calls `.dispose()` on all `scene`-scoped Three.js geometries, materials, and textures.
 4. **Clamped Simulation Step:** The main loop clamps frame delta (`dt <= 0.05s`) so tab-switching or frame drops never teleport characters through tile collisions.
+5. **Pure Logic Boundaries for Flakeless Testing:** Parsing, math, collisions, pathfinding, patrols, dialogue execution, and state transitions MUST stay decoupled from `WebGLRenderer`, DOM, `AudioContext`, and real timers—receiving explicit `dt` values and thin I/O adapters so unit tests run purely in Node with zero flakiness.
 
 ---
 
@@ -380,7 +382,30 @@ export interface GameManifest {
 
 ---
 
-## 6. Mapping *Paper expressions* to Stapler Engine
+## 6. Automated Unit Testing Strategy
+
+Stapler Engine uses a **lightweight, critical-path testing strategy** designed to catch subtle engine and content bugs in under a second without introducing browser flakiness or heavy mocking overhead.
+
+### Runner, Layout & Zero-Flake Rules
+* **Runner:** **Vitest** (`environment: 'node'`), reusing Vite's TypeScript and `"moduleResolution": "Bundler"` resolver with a single devDependency and zero extra build step.
+* **Co-located tests:** Test files live beside their target module as `*.test.ts` (excluded from production Vite bundles) and run via root `npm test` (`vitest run`), `npm run test:watch` (`vitest`), and inside `setup.sh` after `npm run typecheck`.
+* **No DOM / WebGL / wall-clock timers:**
+  * Most Three.js math and scene-graph primitives (`Group`, `Mesh`, `PlaneGeometry`, `MeshStandardMaterial`, `DirectionalLight`, `PerspectiveCamera`, `Vector3`) instantiate cleanly in pure Node without `jsdom` or a WebGL context.
+  * Time-dependent modules (`PaperSprite`, `FixedCamera`, `NpcController`, `MovementController`) are always stepped with explicit `dt` arguments—never `setTimeout`, `Date.now()`, or `requestAnimationFrame`.
+  * I/O boundaries stay thin: `.tmj` and `.dlg` parsers accept plain objects/strings, and `SaveManager` accepts a minimal storage adapter interface (real `IndexedDB` in browser, in-memory `Map` in tests).
+* **Explicitly skipped in unit tests (verified visually in `npm run dev`):** `ViewportManager` (`WebGLRenderer`/`ResizeObserver`), `SvgTextureLoader` (`Image`/`<canvas>` rasterization), `PropLoader` network fetches, HTML/CSS `UIOverlay` layout, `DebugOverlay` visuals, and Web Audio hardware playback.
+
+### Critical-Path Coverage Matrix by Milestone
+| Milestone | High-ROI Unit Tests |
+| :--- | :--- |
+| **Milestone 1 (Foundation)** | `AssetManager` (scoped `.dispose()` freeing `scene` resources without touching `persistent` textures shared by scene materials), `LightingRig` (`maxLights` & `maxShadowLights` caps, flat/dynamic toggle, shadow map disposal), `FixedCamera` (bounds clamping, follow fallback, damped convergence), `PaperSprite` (`alphaTest`/`transparent: false` invariants, deterministic 140 ms flip rotation). |
+| **Milestone 2 (World & Nav)** | `NavGrid` & hybrid colliders (void `GID = 0` blocking, 2D AABB `interior_walls`/props, NPC circle blockers, separate X/Z wall sliding), `Pathfinder` (8-way A*, no diagonal corner-cutting, unreachable goals, radius-aware string-pulling), `.tmj` parser & tile-budget validation, `InteractionSystem` (`enter` zone + `oneShot` guard, `Spacebar` nearest-in-radius selection), `NpcController` (`loop`/`pingpong`/`once` patrols & auto-pause), `PaperSprite` multi-frame UV animation sync. |
+| **Milestone 3 (Narrative & State)** | `ScriptParser` & `DialogueRunner` (`.dlg` AST, `@if`/`@else`/`@set`, `@transition`, syntax errors), `I18nStore` (locale switching & fallback to `defaultLocale`), `EngineApp` mode FSM & `GameState` (valid transitions, input gating, `dt <= 0.05` clamp), `SaveManager` (`SaveSlotData` v1 serialization & slot bounds over an in-memory adapter). |
+| **Milestone 4 (Game Content)** | **Content Integrity Test** in `games/paper-expressions`: scans real `.tmj`, `.dlg`, `locales/*.json`, and `manifest.ts` files on disk to verify every dialogue key exists in every supported locale, every `@transition` targets a valid environment + `spawnId`, every `npc.patrolPath` matches a polyline in its map, and all maps fit tile & shadow budgets. |
+
+---
+
+## 7. Mapping *Paper expressions* to Stapler Engine
 
 All 6 prologue environments run cleanly on the engine without any game-specific code inside `stapler-engine`:
 
@@ -395,19 +420,22 @@ All 6 prologue environments run cleanly on the engine without any game-specific 
 
 ---
 
-## 7. Implementation Milestones (Build Order)
+## 8. Implementation Milestones (Build Order)
 
-1. **Milestone 1 — Workspace & Rendering Tech Spike *(Completed)***
-   * Scaffold Vite + TypeScript monorepo (`packages/stapler-engine` + `games/paper-expressions`).
-   * Build `ViewportManager`, `SvgTextureLoader`, `PaperSprite` (with `alphaTest` + `customDepthMaterial` silhouette shadows), `LightingRig`, and `FixedCamera`.
-   * Verify 1 greybox room with Unua standing on lit tiles casting crisp cutout shadows at 60 FPS.
-2. **Milestone 2 — Tiled Loader, Sprite Animation, Collisions, Patrols & Props**
-   * Implement `TileMapBuilder` (`.tmj` floor with void/non-rectangular support + border walls + `interior_walls` segments).
-   * Extend `PaperSprite` with multi-frame UV sprite-sheet animations (idle, front/back walk cycles) synced to `customDepthMaterial`.
-   * Implement `PropLoader` (`.glb`), `NavGrid` (tiles + sub-tile 2D AABB + NPC circle colliders), `Pathfinder` (8-way A* + radius-aware string-pulling), `MovementController` (click + WASD slide), `InteractionSystem` (`enter` walk-over zones + `interact` click/`Spacebar` + hover/proximity cues), `NpcController` (idle + Tiled waypoint patrol paths), and a toggleable `DebugOverlay` for inspecting nav grids, colliders, triggers, and patrol routes.
-3. **Milestone 3 — Narrative, Audio & Persistence**
-   * Implement `EngineApp`, `EventBus`, `SceneManager`, and `GameState`.
-   * Implement `ScriptParser` (`.dlg` including `@if`/`@else`, `@set`, `@transition`, `@wait`), `DialogueRunner`, `I18nStore`, and HTML/CSS `DialogueView` + `PauseMenuView` + `LoadingView`.
-   * Implement `AudioManager` (`.opus`/`.mp3`, concurrency limit, autoplay unlock), `AssetManager` (`.dispose()` verification across transitions), and `SaveManager` (IndexedDB configurable save slots, default 10 + optional autosave, plus user settings).
+1. **Milestone 1 — Workspace, Rendering Tech Spike & Test Harness**
+   * Scaffold Vite + TypeScript monorepo (`packages/stapler-engine` + `games/paper-expressions`). *(Completed)*
+   * Build `ViewportManager`, `SvgTextureLoader`, `PaperSprite` (with `alphaTest` + `customDepthMaterial` silhouette shadows), `LightingRig`, and `FixedCamera`. *(Completed)*
+   * Verify 1 greybox room with Unua standing on lit tiles casting crisp cutout shadows at 60 FPS. *(Completed)*
+   * Configure **Vitest** (`environment: 'node'`, `npm test`, `setup.sh` check) and add foundation unit tests for `AssetManager`, `LightingRig`, `FixedCamera`, and `PaperSprite`. *(Completed)*
+2. **Milestone 2 — Tiled Loader, Sprite Animation, Collisions, Patrols & Props *(Completed)***
+   * Implement `TileMapBuilder` (`.tmj` floor with void/non-rectangular support + border walls + `interior_walls` segments). *(Completed)*
+   * Extend `PaperSprite` with multi-frame UV sprite-sheet animations (idle, front/back walk cycles) synced to `customDepthMaterial`. *(Completed)*
+   * Implement `PropLoader` (`.glb`), `NavGrid` (tiles + sub-tile 2D AABB + NPC circle colliders), `Pathfinder` (8-way A* + radius-aware string-pulling), `MovementController` (click + WASD slide), `InteractionSystem` (`enter` walk-over zones + `interact` click/`Spacebar` + hover/proximity cues), `NpcController` (idle + Tiled waypoint patrol paths), and a toggleable `DebugOverlay` for inspecting nav grids, colliders, triggers, and patrol routes. *(Completed)*
+   * Add unit tests for `.tmj` parsing/budgets, `NavGrid`/AABB/NPC collision sliding, `Pathfinder` A* + string-pulling, `InteractionSystem` triggers, `NpcController` patrols, and `PaperSprite` UV clips. *(Completed)*
+3. **Milestone 3 — Narrative, Audio & Persistence *(Completed)***
+   * Implement `EngineApp`, `EventBus`, `ModeFsm`, `SceneManager`, and `GameState`. *(Completed)*
+   * Implement `ScriptParser` (`.dlg` including `@if`/`@else`, `@set`, `@transition`, `@wait`), `DialogueRunner`, `I18nStore`, and HTML/CSS `UIOverlay` (`DialogueView`, `PauseMenuView`, `LoadingView`). *(Completed)*
+   * Implement `AudioManager` (`.opus`/`.mp3`, concurrency limit, autoplay unlock), `AssetManager` (`.dispose()` verification across transitions), and `SaveManager` (IndexedDB configurable save slots, default 10 + optional autosave, plus user settings). *(Completed)*
+   * Add unit tests for `ScriptParser`/`DialogueRunner`, `I18nStore`, `ModeFsm`/`GameState` + `dt` clamping, `SfxConcurrencyLimiter`, and `SaveManager` (via an in-memory storage adapter). *(Completed)*
 4. **Milestone 4 — *Paper expressions* Vertical Slice**
-   * Author all 6 Tiled `.tmj` maps, plug in finalized SVGs / `.glb` props / `.dlg` scripts / localized JSONs / audio, and playtest the full 15-minute day cycle + save/load across all rooms.
+   * Author all 6 Tiled `.tmj` maps, plug in finalized SVGs / `.glb` props / `.dlg` scripts / localized JSONs / audio, add the automated content-integrity test, and playtest the full 15-minute day cycle + save/load across all rooms.

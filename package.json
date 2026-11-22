@@ -8,6 +8,11 @@
   "scripts": {
     "dev": "npm --workspace @stapler/paper-expressions run dev",
     "build": "npm --workspace @stapler/engine run build && npm --workspace @stapler/paper-expressions run build",
-    "typecheck": "npm --workspace @stapler/engine run typecheck && npm --workspace @stapler/paper-expressions run typecheck"
+    "typecheck": "npm --workspace @stapler/engine run typecheck && npm --workspace @stapler/paper-expressions run typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0"
   }
 }

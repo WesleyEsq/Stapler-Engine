@@ -1,0 +1,118 @@
+import type { GameManifest } from '@stapler/engine';
+
+export const PAPER_EXPRESSIONS_MANIFEST: GameManifest = {
+  gameId: 'paper_expressions',
+  defaultLocale: 'en',
+  supportedLocales: ['en', 'es'],
+  initialEnvironmentId: 'main_studio',
+  initialSpawnId: 'spawn_start',
+  playerSpriteId: 'unua',
+  maxConcurrentSfx: 8,
+  maxSaveSlots: 10,
+  enableAutosave: true,
+  defaultInteractionRadius: 1.35,
+  defaultMoveSpeed: 4.4,
+  engineConfig: {
+    maxTiles: 4096,
+    maxDimension: 64,
+    maxLights: 8,
+    maxShadowLights: 2,
+    maxDpr: 2,
+  },
+  sprites: {
+    unua: {
+      id: 'unua',
+      svgUrl: '/assets/sprites/unua.svg',
+      renderWidth: 512,
+      renderHeight: 512,
+      worldHeight: 2.1,
+    },
+    assistant: {
+      id: 'assistant',
+      svgUrl: '/assets/sprites/unua.svg',
+      renderWidth: 512,
+      renderHeight: 512,
+      worldHeight: 1.95,
+    },
+  },
+  portraits: {
+    unua: {
+      default: '/assets/sprites/unua.svg',
+    },
+    assistant: {
+      default: '/assets/sprites/unua.svg',
+    },
+  },
+  scripts: {
+    assistant_greeting: '/assets/scripts/assistant_greeting.dlg',
+    study_door: '/assets/scripts/study_door.dlg',
+    study_terminal: '/assets/scripts/study_terminal.dlg',
+    hallway_notice: '/assets/scripts/hallway_notice.dlg',
+  },
+  locales: {
+    en: '/assets/locales/en.json',
+    es: '/assets/locales/es.json',
+  },
+  audio: {},
+  environments: {
+    main_studio: {
+      id: 'main_studio',
+      titleKey: 'env_main_studio',
+      mapUrl: '/assets/maps/milestone2_demo.tmj',
+      dynamicLighting: true,
+      lights: [
+        {
+          type: 'hemisphere',
+          color: '#f5f8ff',
+          groundColor: '#6b6258',
+          intensity: 0.75,
+        },
+        {
+          type: 'directional',
+          color: '#fff4e0',
+          intensity: 1.9,
+          position: [14, 13, 12],
+          target: [8, 0, 5],
+          castShadow: true,
+        },
+      ],
+      camera: {
+        fov: 38,
+        offset: [0, 7.6, 10.4],
+        lookAtOffset: [0, 0.85, 0],
+        followPlayer: true,
+        followSmoothing: 6.5,
+        bounds: { minX: 4.5, maxX: 11.5, minZ: 3.5, maxZ: 8.0 },
+      },
+    },
+    study_closet: {
+      id: 'study_closet',
+      titleKey: 'env_study_closet',
+      mapUrl: '/assets/maps/study_closet.tmj',
+      dynamicLighting: true,
+      lights: [
+        {
+          type: 'hemisphere',
+          color: '#e8efff',
+          groundColor: '#524f63',
+          intensity: 0.8,
+        },
+        {
+          type: 'directional',
+          color: '#eef4ff',
+          intensity: 1.6,
+          position: [7, 10, 8],
+          target: [4, 0, 3.5],
+          castShadow: true,
+        },
+      ],
+      camera: {
+        fov: 38,
+        offset: [0, 6.4, 8.6],
+        lookAtOffset: [0, 0.85, 0],
+        followPlayer: false,
+        followSmoothing: 6.5,
+      },
+    },
+  },
+};

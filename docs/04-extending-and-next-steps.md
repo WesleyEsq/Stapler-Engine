@@ -15,6 +15,10 @@ Start the Milestone 1 dev server (opens on localhost:5173):
 Run strict TypeScript checks across both packages:
   npm run typecheck
 
+Run fast Node-only unit tests (Vitest):
+  npm test
+  npm run test:watch
+
 Run a full production build check:
   npm run build
 
@@ -51,34 +55,38 @@ Quick things you can experiment with right now:
    single source of truth shared between engine subsystems and game manifests.
 4. Register every scene-created Three.js mesh/group with assets.registerObject3D
    under the right scope ("scene" vs. "persistent").
+5. Keep parsing, math, collision, pathfinding, and state-machine logic decoupled
+   from WebGL/DOM/AudioContext and driven by explicit dt arguments, with
+   co-located critical-path *.test.ts files running purely in Node via Vitest
+   (no browser/DOM mocks or wall-clock timers).
 
 
 ## 4. Roadmap from Milestone 1 to Paper expressions
 
-Milestone 2 - Worlds, Props, Animation, and Real Navigation:
-  - Add TileMapBuilder.ts to load Tiled .tmj maps + tileset atlases, including
-    empty/void floor tiles for non-rectangular rooms and interior_walls segments.
-  - Extend PaperSprite.ts with multi-frame UV sprite-sheet animations (idle,
-    front/back walk cycles) synced with customDepthMaterial.
-  - Add PropLoader.ts using Three.js GLTFLoader for .glb 3D props.
-  - Add NavGrid.ts + sub-tile 2D AABB/NPC colliders, Pathfinder.ts (8-way A* +
-    radius-aware string-pulling), and MovementController.ts (click + WASD slide).
-  - Add InteractionSystem.ts (walk-over "enter" zones + "interact" click/Spacebar
-    targets + hover/proximity cues) and NpcController.ts (idle + Tiled waypoint
-    patrol paths).
-  - Add a toggleable DebugOverlay for visualizing NavGrid, colliders, triggers,
-    and patrol paths during level authoring.
+Milestone 1 (Completed) - Rendering Spike & Unit Test Harness:
+  - Vitest (environment: "node") configured in vitest.config.ts, package.json,
+    and setup.sh, with foundation unit tests for AssetManager, LightingRig,
+    FixedCamera, and PaperSprite.
 
-Milestone 3 - Dialogue, Audio, Saves, and Scene Transitions:
-  - Add EngineApp.ts, EventBus.ts, SceneManager.ts, and GameState.ts.
-  - Add ScriptParser.ts (.dlg including @transition, @if/@else, @set),
-    DialogueRunner.ts, and I18nStore.ts.
-  - Add AudioManager.ts (.opus/.mp3) and SaveManager.ts (IndexedDB configurable
-    save slots, default 10 + autosave, plus user settings).
-  - Add UIOverlay DOM views (DialogueView, PauseMenuView, LoadingView).
+Milestone 2 (Completed) - Worlds, Props, Animation, and Real Navigation:
+  - TileMapBuilder.ts (.tmj loader with void non-rectangular floors and
+    interior_walls), PaperSprite.ts multi-frame UV animations, PropLoader.ts
+    (.glb), NavGrid.ts + 2D AABB/NPC colliders, Pathfinder.ts (8-way A* +
+    radius-aware string-pulling), MovementController.ts, InteractionSystem.ts,
+    NpcController.ts, DebugOverlay.ts, Milestone 2 demo map, and unit tests.
+
+Milestone 3 (Completed) - Dialogue, Audio, Saves, and Scene Transitions:
+  - EngineApp.ts, ModeFsm.ts, EventBus.ts, SceneManager.ts, GameState.ts.
+  - ScriptParser.ts (.dlg including @transition, @if/@else, @set, @wait),
+    DialogueRunner.ts, and I18nStore.ts (live en/es switching).
+  - AudioManager.ts (.opus/.mp3 + SfxConcurrencyLimiter) and SaveManager.ts
+    (IndexedDB configurable save slots, default 10 + autosave, plus settings).
+  - UIOverlay DOM views (DialogueView, PauseMenuView, LoadingView) + unit tests.
 
 Milestone 4 - Paper expressions Content:
   - Author all 6 environments (apt_interior, apt_hallway_high, apt_hallway_low,
     front_road, campus, classroom) in Tiled.
   - Author Inkscape SVGs for Chloe, Ada, Turrialba, and Unua variants.
-  - Write .dlg scripts, English/other locale JSON files, and add audio tracks.
+  - Write .dlg scripts, English/other locale JSON files, add audio tracks, and
+    add a content-integrity test verifying dialogue keys, transitions, and
+    patrol paths across real game assets.
