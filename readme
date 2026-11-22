@@ -1,0 +1,26 @@
+# Stapler Engine
+
+A lightweight, decoupled **2.5D narrative point-and-click web game engine** built with **TypeScript** and **Three.js**, designed for visual-novel/exploration hybrids with a tactile paper-cutout diorama aesthetic.
+
+## Project Structure
+
+- `setup.sh` — One-step workspace installation, TypeScript typecheck, and build verification script.
+- `docs/` — Plain-text-friendly documentation explaining how every part of the engine works together (`00-overview.md` through `04-extending-and-next-steps.md`).
+- `packages/stapler-engine/` — Reusable decoupled TypeScript + Three.js engine (`@stapler/engine`).
+- `games/paper-expressions/` — Vertical-slice test game (`@stapler/paper-expressions`).
+- `Unua.svg` — Committed lineless geometric SVG style anchor (Professor Unua).
+- `software_specifications/1-Stapler_Engine.md` — Engine requirements, asset formats, rendering constraints, and test game design (*Paper expressions*).
+- `software_specifications/2-Architecture.md` — Technical architecture, TypeScript contracts, Tiled/dialogue schemas, and build milestones.
+- `Concept Art/SVG and example character/` — Early paper-cutout visual style reference and Ada Nudos pose/walk-cycle explorations.
+- `Concept Art/User Interface/` — UI and visual novel overlay mockups (planned).
+
+## Core Technical Pillars
+
+- **2.5D Paper-Cutout Rendering:** SVG-authored characters rasterized to high-DPI textures on lit 3D planes with alpha-cutout silhouette shadows and optional `.glb` 3D props.
+- **Compact Tile Environments:** Fixed-camera rectangular environments (default budget up to `4,096` tiles / max dimension `64`) authored in Tiled (`.tmj`), with merged/chunked geometry, configurable wall heights + optional interior partitions, and configurable lights (capped at 2 shadow casters).
+- **Hybrid Controls & VN Overlay:** Grid A* point-and-click (with path smoothing) + WASD/keyboard controls paired with a localized HTML/CSS visual novel dialogue overlay.
+- **Web-First Discipline:** `.opus`/`.mp3` audio with Web Audio concurrency limits, `IndexedDB` configurable save slots (default 10 + autosave), and explicit Three.js GPU resource disposal across scene transitions.
+
+## Test Game: *Paper expressions*
+
+A 15-minute narrative prologue following **Chloe Relay** — a sleepy android infiltrating university life — across 6 environments (apartment interior, upper/lower tower hallways, front road, campus, and compilers classroom) alongside classmate **Ada Nudos**, **Professor Turrialba**, and Chloe's robot creator, **Professor Unua**.

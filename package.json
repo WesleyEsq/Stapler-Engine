@@ -1,0 +1,13 @@
+{
+  "name": "stapler-workspace",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "games/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace @stapler/paper-expressions run dev",
+    "build": "npm --workspace @stapler/engine run build && npm --workspace @stapler/paper-expressions run build",
+    "typecheck": "npm --workspace @stapler/engine run typecheck && npm --workspace @stapler/paper-expressions run typecheck"
+  }
+}

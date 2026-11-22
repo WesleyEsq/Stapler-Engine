@@ -1,0 +1,30 @@
+Stapler Engine — Concept Art & Visual Style Reference
+=====================================================
+
+Visual Style:
+All characters and environment cutouts use a 2.5D paper-diorama aesthetic with
+a white sticker/cutout border and cast shadows against 3D lit planes.
+- Committed production character style: Lineless, flat-shaded geometric SVG
+  vectors (see `../../Unua.svg`), optimized for fast solo production, modular
+  expressions/animation, and crisp high-DPI GPU rasterization.
+- Early concept sheets in this folder explore Ada Nudos's poses, walk cadence,
+  and layered 2.5D diorama lighting/staging.
+
+Files in this folder:
+- Scenario Style.jpeg
+    Visual, lighting, and paper-cutout material style reference (demonstrating
+    layered 2.5D depth, white cutout edges, and ground drop shadows — not a
+    literal location from the test game).
+- walking.jpeg
+    Ada Nudos — 4-frame front/3/4 walk cycle (Contact Left, Passing, Contact
+    Right, Passing).
+- walking_back.jpeg
+    Ada Nudos — 4-frame back walk cycle matching the front cycle cadence.
+- emotion_1.jpeg
+    Ada Nudos — Character concept sheet & base poses (1. Neutral Idle through
+    5. Celebration).
+- emotion_2.jpeg
+    Ada Nudos — Additional dialogue & exploration poses (6. Concentration
+    through 10. Inspecting Clues).
+- _originals/
+    Archived unedited reference sheets prior to consistency cleanup.
