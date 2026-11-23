@@ -60,6 +60,7 @@ export class MovementController {
   private lastFacingVec: Vec2 = { x: 1, z: 0 };
   private markerPulse = 0;
   private enabled = true;
+  private interactCooldown = 0;
 
   constructor(options: MovementControllerOptions) {
     this.domElement = options.domElement;
@@ -92,13 +93,15 @@ export class MovementController {
     this.domElement.addEventListener('pointermove', this.onPointerMove);
   }
 
-  setEnabled(enabled: boolean): void {
+  setEnabled(enabled: boolean, options: { interactCooldownSec?: number } = {}): void {
     this.enabled = enabled;
     if (!enabled) {
       this.keysDown.clear();
       this.cancelPath();
       this.setHovered(null);
       this.sprite.setMoving(false);
+    } else if (options.interactCooldownSec && options.interactCooldownSec > 0) {
+      this.interactCooldown = Math.max(this.interactCooldown, options.interactCooldownSec);
     }
   }
 
@@ -133,6 +136,7 @@ export class MovementController {
     }
 
     if (code === 'Space' && !e.repeat) {
+      if (this.interactCooldown > 0) return;
       const pos = this.sprite.getPosition();
       const target = this.interactions.findNearestInteractable(
         pos.x,
@@ -225,6 +229,10 @@ export class MovementController {
   update(dt: number): void {
     const pos = this.sprite.getPosition();
 
+    if (this.interactCooldown > 0) {
+      this.interactCooldown = Math.max(0, this.interactCooldown - dt);
+    }
+
     if (!this.enabled) {
       this.sprite.setMoving(false);
       this.sprite.playAnimation('idle');
@@ -252,7 +260,7 @@ export class MovementController {
       const moved = Math.hypot(next.x - pos.x, next.z - pos.z) > 1e-4;
       this.sprite.setPosition(next.x, next.z);
       this.lastFacingVec = { x: dirX, z: dirZ };
-      if (dx !== 0) this.sprite.setFacingRight(dx > 0);
+      this.updateSpriteFacing(dirX, dirZ);
       this.applyMovementAnimation(moved, dirZ);
       this.afterPositionUpdate(next.x, next.z);
       return;
@@ -324,9 +332,7 @@ export class MovementController {
 
       this.sprite.setPosition(next.x, next.z);
       this.lastFacingVec = { x: dirX, z: dirZ };
-      if (Math.abs(dirX) > 0.04) {
-        this.sprite.setFacingRight(dirX > 0);
-      }
+      this.updateSpriteFacing(dirX, dirZ);
       this.applyMovementAnimation(true, dirZ);
 
       this.markerPulse += dt * 6;
@@ -340,6 +346,17 @@ export class MovementController {
     this.sprite.setMoving(false);
     this.sprite.playAnimation('idle');
     this.afterPositionUpdate(pos.x, pos.z);
+  }
+
+  private updateSpriteFacing(dirX: number, dirZ: number): void {
+    if (Math.abs(dirX) >= Math.abs(dirZ) && Math.abs(dirX) > 0.04) {
+      this.sprite.setFacing(dirX > 0 ? 'right' : 'left');
+    } else if (Math.abs(dirZ) > 0.04) {
+      if (Math.abs(dirX) > 0.08) {
+        this.sprite.setFacingRight(dirX > 0);
+      }
+      this.sprite.setFacing(dirZ < 0 ? 'back' : 'front');
+    }
   }
 
   private applyMovementAnimation(moving: boolean, dirZ: number): void {

@@ -20,9 +20,9 @@ async function bootstrap(): Promise<void> {
     container: viewportEl,
     manifest: PAPER_EXPRESSIONS_MANIFEST,
     onSceneBuilt: attachPlaceholderProps,
-    onStatsTick: ({ x, z, fps, mode, environmentId }) => {
+    onStatsTick: ({ x, z, facing, fps, mode, environmentId }) => {
       if (statsEl) {
-        statsEl.textContent = `${environmentId} [${mode}] | (${x.toFixed(2)}, ${z.toFixed(2)}) | ${fps} FPS`;
+        statsEl.textContent = `${environmentId} [${mode}] | (${x.toFixed(2)}, ${z.toFixed(2)}) facing:${facing} | ${fps} FPS`;
       }
     },
   });

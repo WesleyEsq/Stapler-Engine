@@ -65,7 +65,8 @@ export class ViewportManager {
       this.camera.updateProjectionMatrix();
     }
 
-    const uiScale = Math.min(width / this.baseWidth, height / this.baseHeight);
+    const rawScale = Math.min(width / this.baseWidth, height / this.baseHeight);
+    const uiScale = Math.max(0.75, Math.min(1.35, rawScale));
     this.container.style.setProperty('--ui-scale', uiScale.toFixed(4));
   }
 

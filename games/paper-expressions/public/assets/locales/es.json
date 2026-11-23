@@ -35,7 +35,7 @@
   },
   "lines": {
     "assistant_intro_01": "¡Profesora! La terminal de diagnóstico dentro del cuarto de estudio volvió a parpadear.",
-    "unua_intro_02": "...Genial. Pasaré por la puerta del estudio para revisar los registros yo misma.",
+    "unua_intro_02": "...Genial.{w=0.45} Pasaré por la puerta del estudio...{p} para revisar los registros yo misma.",
     "assistant_repeat_01": "La puerta del estudio está rodeando la pared interior a la derecha.",
     "assistant_after_terminal_01": "¿Ya revisaste los registros de diagnóstico? ¡Todo está en verde!",
     "unua_after_terminal_02": "Liberación de memoria limpia, cero fugas. Prueba guardar desde el menú de pausa (Esc).",

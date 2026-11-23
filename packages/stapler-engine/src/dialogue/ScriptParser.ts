@@ -1,10 +1,18 @@
 import type { FacingDirection, FlagValue, PortraitSlot } from '../types/contracts';
 
 export type DialogueStatement =
-  | { type: 'portrait'; slot: PortraitSlot; character: string | null; pose: string | null; line: number }
+  | {
+      type: 'portrait';
+      slot: PortraitSlot;
+      character: string | null;
+      pose: string | null;
+      facing?: 'left' | 'right';
+      line: number;
+    }
+  | { type: 'box'; style: string; line: number }
   | { type: 'sfx'; soundId: string; line: number }
   | { type: 'voice'; voiceId: string; line: number }
-  | { type: 'say'; speaker: string; lineKey: string; line: number }
+  | { type: 'say'; speaker: string; lineKey: string; append?: boolean; line: number }
   | { type: 'set'; flag: string; value: FlagValue; line: number }
   | {
       type: 'if';
@@ -80,13 +88,22 @@ export function parseDialogueScript(source: string): DialogueStatement[] {
     const head = tokens[0];
     if (!head) continue;
 
-    if (head === 'say') {
+    if (head === 'say' || head === 'append') {
       const speaker = tokens[1];
       const lineKey = tokens[2];
       if (!speaker || !lineKey || tokens.length !== 3) {
-        throw new ScriptParseError(lineNum, `Expected "say <speaker> <lineKey>" (got "${trimmed}").`);
+        throw new ScriptParseError(
+          lineNum,
+          `Expected "${head} <speaker> <lineKey>" (got "${trimmed}").`,
+        );
       }
-      append({ type: 'say', speaker, lineKey, line: lineNum });
+      append({
+        type: 'say',
+        speaker,
+        lineKey,
+        ...(head === 'append' ? { append: true } : {}),
+        line: lineNum,
+      });
       continue;
     }
 
@@ -107,14 +124,34 @@ export function parseDialogueScript(source: string): DialogueStatement[] {
           append({ type: 'portrait', slot: slotRaw, character: null, pose: null, line: lineNum });
         } else {
           const pose = tokens[3];
-          if (!pose || tokens.length !== 4) {
+          const facingRaw = tokens[4];
+          if (!pose || tokens.length < 4 || tokens.length > 5) {
             throw new ScriptParseError(
               lineNum,
-              'Expected "@portrait <slot> <character> <pose>" or "@portrait <slot> clear".',
+              'Expected "@portrait <slot> <character> <pose> [left|right]" or "@portrait <slot> clear".',
             );
           }
-          append({ type: 'portrait', slot: slotRaw, character: arg2, pose, line: lineNum });
+          let facing: 'left' | 'right' | undefined;
+          if (facingRaw !== undefined) {
+            if (facingRaw !== 'left' && facingRaw !== 'right') {
+              throw new ScriptParseError(
+                lineNum,
+                `Invalid portrait facing "${facingRaw}"; expected left or right.`,
+              );
+            }
+            facing = facingRaw;
+          }
+          append({ type: 'portrait', slot: slotRaw, character: arg2, pose, facing, line: lineNum });
         }
+        break;
+      }
+
+      case '@box': {
+        const style = tokens[1];
+        if (!style || tokens.length !== 2) {
+          throw new ScriptParseError(lineNum, 'Expected "@box <styleName>" (e.g. default, thought, system).');
+        }
+        append({ type: 'box', style, line: lineNum });
         break;
       }
 

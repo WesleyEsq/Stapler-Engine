@@ -317,11 +317,7 @@ export class SceneManager {
     // 6. Position persistent player sprite & seed walk-over zones
     const spawnPoint = this.resolveSpawn(parsed.spawns, parsed.width, parsed.height, spawnReq);
     this.playerSprite.setPosition(spawnPoint.x, spawnPoint.z);
-    if (spawnPoint.facing === 'left') {
-      this.playerSprite.setFacingRight(false);
-    } else if (spawnPoint.facing === 'right') {
-      this.playerSprite.setFacingRight(true);
-    }
+    this.playerSprite.setFacing(spawnPoint.facing);
     this.playerSprite.setMoving(false);
     this.playerSprite.playAnimation('idle');
     interactions.seedInitialPosition(spawnPoint.x, spawnPoint.z);

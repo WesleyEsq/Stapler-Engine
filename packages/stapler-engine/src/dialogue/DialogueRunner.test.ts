@@ -17,7 +17,9 @@ describe('DialogueRunner', () => {
 
     const script = parseDialogueScript(`
       @sfx chime
+      @box system
       @portrait left unua neutral
+      @portrait right assistant default
       @if has_key == true
         say unua door_unlocked
         @set entered_study true
@@ -33,8 +35,10 @@ describe('DialogueRunner', () => {
     expect(sfxSpy).toHaveBeenCalledWith('chime');
 
     const snap = runner.getSnapshot();
+    expect(snap.boxStyle).toBe('system');
     expect(snap.currentLine).toEqual({ speaker: 'unua', lineKey: 'door_unlocked' });
-    expect(snap.portraits.left).toEqual({ character: 'unua', pose: 'neutral' });
+    expect(snap.portraits.left).toEqual({ character: 'unua', pose: 'neutral', facing: 'right' });
+    expect(snap.portraits.right).toEqual({ character: 'assistant', pose: 'default', facing: 'left' });
 
     // Advancing executes @set and @transition, completing dialogue
     runner.advance();

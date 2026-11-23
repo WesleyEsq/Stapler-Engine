@@ -6,9 +6,11 @@ describe('ScriptParser', () => {
     const src = `
       # Intro conversation
       @sfx ui_open
+      @box system
       @portrait left chloe sleepy
-      @portrait right ada inquiry
+      @portrait right ada inquiry left
       say ada line_01
+      append ada line_01_b
 
       @if fell_downstairs == true
         say chloe line_secret
@@ -24,12 +26,14 @@ describe('ScriptParser', () => {
     `;
 
     const ast = parseDialogueScript(src);
-    expect(ast).toHaveLength(9);
+    expect(ast).toHaveLength(11);
     expect(ast[0]).toMatchObject({ type: 'sfx', soundId: 'ui_open' });
-    expect(ast[1]).toMatchObject({ type: 'portrait', slot: 'left', character: 'chloe', pose: 'sleepy' });
-    expect(ast[3]).toMatchObject({ type: 'say', speaker: 'ada', lineKey: 'line_01' });
+    expect(ast[1]).toMatchObject({ type: 'box', style: 'system' });
+    expect(ast[2]).toMatchObject({ type: 'portrait', slot: 'left', character: 'chloe', pose: 'sleepy' });
+    expect(ast[4]).toMatchObject({ type: 'say', speaker: 'ada', lineKey: 'line_01' });
+    expect(ast[5]).toMatchObject({ type: 'say', speaker: 'ada', lineKey: 'line_01_b', append: true });
 
-    const ifNode = ast[4];
+    const ifNode = ast[6];
     expect(ifNode?.type).toBe('if');
     if (ifNode?.type === 'if') {
       expect(ifNode.flag).toBe('fell_downstairs');
@@ -39,9 +43,9 @@ describe('ScriptParser', () => {
       expect(ifNode.elseBranch).toHaveLength(1);
     }
 
-    expect(ast[5]).toMatchObject({ type: 'portrait', slot: 'right', character: null, pose: null });
-    expect(ast[6]).toMatchObject({ type: 'wait', seconds: 0.4 });
-    expect(ast[7]).toMatchObject({
+    expect(ast[7]).toMatchObject({ type: 'portrait', slot: 'right', character: null, pose: null });
+    expect(ast[8]).toMatchObject({ type: 'wait', seconds: 0.4 });
+    expect(ast[9]).toMatchObject({
       type: 'transition',
       environmentId: 'classroom',
       spawnId: 'spawn_door',

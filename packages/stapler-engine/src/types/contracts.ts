@@ -245,6 +245,36 @@ export interface EnvironmentConfig {
   camera: CameraConfig;
 }
 
+export interface UiThemeConfig {
+  /** Optional custom CSS class added to `.stapler-ui-root` for game-level stylesheets. */
+  customCssClass?: string;
+  fontFamily?: string;
+  speakerFontFamily?: string;
+  /** Multiplier applied on top of responsive zoom-friendly dialogue text sizing (default 1.0). */
+  dialogueTextScale?: number;
+  dialogueMaxWidth?: string;
+  dialogueMinHeight?: string;
+  boxBackground?: string;
+  boxTextColor?: string;
+  boxBorderColor?: string;
+  boxBorderWidth?: string;
+  boxRadius?: string;
+  boxShadow?: string;
+  speakerBackground?: string;
+  speakerTextColor?: string;
+  speakerBorderColor?: string;
+  hintColor?: string;
+  accentColor?: string;
+  /** Portrait stage height CSS value (default `clamp(250px, 48vh, 480px)`). */
+  portraitHeight?: string;
+  /** How far portrait bottoms tuck behind the top edge of the dialogue box (default `48px`). */
+  portraitOverlap?: string;
+  /** Brightness filter applied to non-speaking portraits (0..1, default `0.45`). */
+  portraitInactiveBrightness?: number;
+  /** Direction base portrait art faces by default so right-side portraits auto-mirror inward. */
+  portraitDefaultFacing?: 'left' | 'right';
+}
+
 export interface GameManifest {
   gameId: string;
   defaultLocale: string;
@@ -258,6 +288,8 @@ export interface GameManifest {
   defaultInteractionRadius?: number;
   defaultMoveSpeed?: number;
   engineConfig?: Partial<EngineConfig>;
+  /** Optional game-level visual theme & box customization for the HTML/CSS UI overlay. */
+  uiTheme?: UiThemeConfig;
   environments: Record<string, EnvironmentConfig>;
   sprites: Record<string, SpriteAnimationSpec>;
   /** Optional map of characterId -> poseName -> portrait image/SVG URL. */

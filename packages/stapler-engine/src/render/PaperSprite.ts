@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { SpriteAnimationClip } from '../types/contracts';
+import type { FacingDirection, SpriteAnimationClip } from '../types/contracts';
 
 export interface PaperSpriteOptions {
   texture: THREE.Texture;
@@ -44,6 +44,7 @@ export class PaperSprite {
   private readonly animations: Record<string, SpriteAnimationClip>;
   private readonly baseMeshY: number;
 
+  private facing: FacingDirection = 'front';
   private facingRight = true;
   private flipProgress = 0; // 0 = facing right (rotY=0), 1 = facing left (rotY=PI)
   private walkTime = 0;
@@ -118,8 +119,22 @@ export class PaperSprite {
     return { x: this.root.position.x, z: this.root.position.z };
   }
 
+  setFacing(direction: FacingDirection): void {
+    this.facing = direction;
+    if (direction === 'right') {
+      this.facingRight = true;
+    } else if (direction === 'left') {
+      this.facingRight = false;
+    }
+  }
+
+  getFacing(): FacingDirection {
+    return this.facing;
+  }
+
   setFacingRight(right: boolean): void {
     this.facingRight = right;
+    this.facing = right ? 'right' : 'left';
   }
 
   isFacingRight(): boolean {

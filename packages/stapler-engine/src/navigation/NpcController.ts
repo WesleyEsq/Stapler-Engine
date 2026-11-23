@@ -78,14 +78,21 @@ export class NpcController {
     return this.npcs.get(id)?.sprite.getPosition();
   }
 
-  /** Pauses an NPC's patrol and turns them horizontally toward the player. */
+  /** Pauses an NPC's patrol and turns them toward the player. */
   beginInteraction(id: string, playerPos: Vec2): void {
     const npc = this.npcs.get(id);
     if (!npc) return;
     npc.interacting = true;
     const pos = npc.sprite.getPosition();
-    if (Math.abs(playerPos.x - pos.x) > 0.02) {
-      npc.sprite.setFacingRight(playerPos.x > pos.x);
+    const dx = playerPos.x - pos.x;
+    const dz = playerPos.z - pos.z;
+    if (Math.abs(dx) >= Math.abs(dz) && Math.abs(dx) > 0.02) {
+      npc.sprite.setFacing(dx > 0 ? 'right' : 'left');
+    } else if (Math.abs(dz) > 0.02) {
+      if (Math.abs(dx) > 0.05) {
+        npc.sprite.setFacingRight(dx > 0);
+      }
+      npc.sprite.setFacing(dz < 0 ? 'back' : 'front');
     }
     npc.sprite.setMoving(false);
     npc.sprite.playAnimation('idle');
@@ -176,8 +183,13 @@ export class NpcController {
       npc.sprite.setPosition(nextX, nextZ);
       this.syncCollider(npc);
 
-      if (Math.abs(dirX) > 0.05) {
-        npc.sprite.setFacingRight(dirX > 0);
+      if (Math.abs(dirX) >= Math.abs(dirZ) && Math.abs(dirX) > 0.05) {
+        npc.sprite.setFacing(dirX > 0 ? 'right' : 'left');
+      } else if (Math.abs(dirZ) > 0.05) {
+        if (Math.abs(dirX) > 0.08) {
+          npc.sprite.setFacingRight(dirX > 0);
+        }
+        npc.sprite.setFacing(dirZ < 0 ? 'back' : 'front');
       }
       npc.sprite.setMoving(true);
       if (dirZ < -0.5 && npc.sprite.hasAnimation('walk_back')) {

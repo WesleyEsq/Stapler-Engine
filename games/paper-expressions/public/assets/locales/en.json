@@ -35,7 +35,7 @@
   },
   "lines": {
     "assistant_intro_01": "Professor! The diagnostics terminal inside the study room is blinking again.",
-    "unua_intro_02": "...Great. I'll go through the study door and check the logs myself.",
+    "unua_intro_02": "...Great.{w=0.45} I'll go through the study door...{p} and check the logs myself.",
     "assistant_repeat_01": "The study door is just around the interior partition wall on the right.",
     "assistant_after_terminal_01": "You pulled the diagnostics logs already? Everything looks green!",
     "unua_after_terminal_02": "Clean memory disposal, zero leaks. Try saving from the Pause menu (Esc).",

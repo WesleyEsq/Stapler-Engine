@@ -43,6 +43,17 @@ describe('PaperSprite', () => {
     sprite.setFacingRight(true);
     sprite.update(0.14);
     expect(sprite.mesh.rotation.y).toBeCloseTo(0, 5);
+    expect(sprite.getFacing()).toBe('right');
+
+    // Tracks full 4-way facing while keeping horizontal paper-flip state consistent
+    sprite.setFacing('left');
+    expect(sprite.getFacing()).toBe('left');
+    expect(sprite.isFacingRight()).toBe(false);
+    sprite.setFacing('back');
+    expect(sprite.getFacing()).toBe('back');
+    expect(sprite.isFacingRight()).toBe(false);
+    sprite.setFacing('front');
+    expect(sprite.getFacing()).toBe('front');
   });
 
   it('applies walk bob while moving and settles cleanly back to rest', () => {

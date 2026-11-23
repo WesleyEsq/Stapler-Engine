@@ -30,6 +30,7 @@ import type { InteractableTarget, TriggerFiredEvent } from '../navigation/Intera
 export interface EngineFrameStats {
   x: number;
   z: number;
+  facing: FacingDirection;
   fps: number;
   mode: EngineMode;
   environmentId: string;
@@ -179,6 +180,7 @@ export class EngineApp {
       supportedLocales: this.manifest.supportedLocales,
       slotIds: this.saves.getSlotIds(),
       portraits: this.manifest.portraits,
+      theme: this.manifest.uiTheme,
       onDialogueAdvance: () => this.dialogueRunner?.advance(),
       pauseCallbacks: {
         onResume: () => this.resumeFromPause(),
@@ -214,7 +216,7 @@ export class EngineApp {
           });
         } else if (this.fsm.getMode() === 'DIALOGUE') {
           this.fsm.transition('EXPLORE');
-          this.sceneManager?.getActive()?.mover.setEnabled(true);
+          this.sceneManager?.getActive()?.mover.setEnabled(true, { interactCooldownSec: 0.25 });
         }
       },
     });
@@ -277,11 +279,7 @@ export class EngineApp {
     const pos = this.playerSprite!.getPosition();
     this.state.environmentId = environmentId;
     this.state.environmentTitleKey = active.envConfig.titleKey;
-    this.state.setPlayerState(
-      pos.x,
-      pos.z,
-      this.playerSprite!.isFacingRight() ? 'right' : 'left',
-    );
+    this.state.setPlayerState(pos.x, pos.z, this.playerSprite!.getFacing());
 
     if (active.envConfig.bgmId) {
       void this.audio.playBgm(active.envConfig.bgmId);
@@ -342,8 +340,7 @@ export class EngineApp {
   async saveToSlot(slotId: number | 'autosave'): Promise<void> {
     if (this.playerSprite) {
       const pos = this.playerSprite.getPosition();
-      const facing: FacingDirection = this.playerSprite.isFacingRight() ? 'right' : 'left';
-      this.state.setPlayerState(pos.x, pos.z, facing);
+      this.state.setPlayerState(pos.x, pos.z, this.playerSprite.getFacing());
     }
     const payload = this.state.toSaveSlotData(slotId);
     await this.saves.save(slotId, payload);
@@ -495,9 +492,11 @@ export class EngineApp {
     if (e.code === 'Escape' && !e.repeat) {
       if (mode === 'EXPLORE') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         void this.openPauseMenu();
       } else if (mode === 'PAUSED') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         this.resumeFromPause();
       }
       return;
@@ -505,6 +504,7 @@ export class EngineApp {
 
     if (mode === 'DIALOGUE' && (e.code === 'Space' || e.code === 'Enter') && !e.repeat) {
       e.preventDefault();
+      e.stopImmediatePropagation();
       this.ui?.dialogue.handleAdvanceInput();
     }
   };
@@ -537,11 +537,7 @@ export class EngineApp {
       if (mode !== 'PAUSED' && mode !== 'LOADING') {
         this.playerSprite.update(dt);
         const pos = this.playerSprite.getPosition();
-        this.state.setPlayerState(
-          pos.x,
-          pos.z,
-          this.playerSprite.isFacingRight() ? 'right' : 'left',
-        );
+        this.state.setPlayerState(pos.x, pos.z, this.playerSprite.getFacing());
         active.npcController.update(dt, { mode, playerPos: pos, playerRadius: 0.28 });
         active.fixedCamera.update(
           dt,
@@ -566,6 +562,7 @@ export class EngineApp {
       this.onStatsTick?.({
         x: pos.x,
         z: pos.z,
+        facing: this.playerSprite.getFacing(),
         fps: this.fpsDisplay,
         mode,
         environmentId: active.environmentId,

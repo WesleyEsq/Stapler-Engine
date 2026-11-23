@@ -267,7 +267,7 @@ say ada campus_ada_02
 @end
 ```
 
-Supported directives: `@portrait <left|center|right> <character> <pose>`, `@sfx <id>`, `say <speaker> <lineKey>`, `@if <flag> == <value>` / `@else` / `@endif`, `@set <flag> <value>`, `@transition <envId> <spawnId> [facing]`, `@wait <seconds>`, and `@end`.
+Supported directives: `@portrait <left|center|right> <character> <pose> [left|right]`, `@box <styleName>` (sets `data-box-style` on the dialogue box so games can theme variants like `default`, `thought`, or `system` via CSS alongside `GameManifest.uiTheme`), `@sfx <id>`, `@voice <id>`, `say <speaker> <lineKey>`, `append <speaker> <lineKey>` (appends onto the active box without clearing previous text, useful for mid-sentence portrait/SFX swaps), `@if <flag> == <value>` / `@else` / `@endif`, `@set <flag> <value>`, `@transition <envId> <spawnId> [facing]`, `@wait <seconds>`, and `@end`. Localized strings also support inline pacing tags `{p}` (click-to-continue mid-sentence) and `{w=0.4}` (timed beat).
 
 Localized strings live in `public/assets/locales/<lang>.json`:
 ```json

@@ -1,3 +1,4 @@
+import type { UiThemeConfig } from '../types/contracts';
 import type { I18nStore } from '../dialogue/I18nStore';
 import { DialogueView } from './DialogueView';
 import { LoadingView } from './LoadingView';
@@ -9,6 +10,7 @@ export interface UIOverlayOptions {
   supportedLocales: readonly string[];
   slotIds: ReadonlyArray<number | 'autosave'>;
   portraits?: Record<string, Record<string, string>>;
+  theme?: UiThemeConfig;
   onDialogueAdvance: () => void;
   pauseCallbacks: PauseMenuCallbacks;
 }
@@ -31,6 +33,9 @@ export class UIOverlay {
 
     this.root = document.createElement('div');
     this.root.className = 'stapler-ui-root';
+    if (options.theme) {
+      this.applyTheme(options.theme);
+    }
     options.container.appendChild(this.root);
 
     this.promptEl = document.createElement('div');
@@ -42,6 +47,7 @@ export class UIOverlay {
       parent: this.root,
       i18n: options.i18n,
       portraits: options.portraits,
+      portraitDefaultFacing: options.theme?.portraitDefaultFacing,
       onAdvanceRequested: options.onDialogueAdvance,
     });
 
@@ -54,6 +60,38 @@ export class UIOverlay {
     });
 
     this.loading = new LoadingView(this.root);
+  }
+
+  applyTheme(theme: UiThemeConfig): void {
+    if (theme.customCssClass) {
+      for (const cls of theme.customCssClass.split(/\s+/).filter(Boolean)) {
+        this.root.classList.add(cls);
+      }
+    }
+    const setVar = (name: string, val: string | number | undefined): void => {
+      if (val !== undefined) {
+        this.root.style.setProperty(name, String(val));
+      }
+    };
+    setVar('--stapler-font-family', theme.fontFamily);
+    setVar('--stapler-speaker-font', theme.speakerFontFamily);
+    setVar('--stapler-text-scale', theme.dialogueTextScale);
+    setVar('--stapler-box-max-width', theme.dialogueMaxWidth);
+    setVar('--stapler-box-min-height', theme.dialogueMinHeight);
+    setVar('--stapler-box-bg', theme.boxBackground);
+    setVar('--stapler-box-text', theme.boxTextColor);
+    setVar('--stapler-box-border', theme.boxBorderColor);
+    setVar('--stapler-box-border-width', theme.boxBorderWidth);
+    setVar('--stapler-box-radius', theme.boxRadius);
+    setVar('--stapler-box-shadow', theme.boxShadow);
+    setVar('--stapler-speaker-bg', theme.speakerBackground);
+    setVar('--stapler-speaker-text', theme.speakerTextColor);
+    setVar('--stapler-speaker-border', theme.speakerBorderColor);
+    setVar('--stapler-hint-color', theme.hintColor);
+    setVar('--stapler-accent', theme.accentColor);
+    setVar('--stapler-portrait-height', theme.portraitHeight);
+    setVar('--stapler-portrait-overlap', theme.portraitOverlap);
+    setVar('--stapler-portrait-inactive-brightness', theme.portraitInactiveBrightness);
   }
 
   setInteractPrompt(text: string | null): void {
@@ -82,8 +120,9 @@ function ensureDefaultStyles(): void {
   inset: 0;
   pointer-events: none;
   z-index: 20;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: calc(15px * var(--ui-scale, 1));
+  font-family: var(--stapler-font-family, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  /* Uses rem + gentle vw so browser zoom (Ctrl + / -) scales UI naturally instead of fighting viewport width */
+  font-size: clamp(1rem, 0.9rem + 0.3vw, 1.35rem);
 }
 
 .stapler-ui-root [hidden] {
@@ -95,13 +134,13 @@ function ensureDefaultStyles(): void {
   left: 50%;
   bottom: calc(26px * var(--ui-scale, 1));
   transform: translateX(-50%);
-  background: rgba(22, 25, 35, 0.9);
+  background: rgba(22, 25, 35, 0.92);
   border: 1px solid rgba(116, 208, 255, 0.55);
   color: #f3f7ff;
-  padding: 0.45em 1.05em;
+  padding: 0.45em 1.1em;
   border-radius: 999px;
   font-weight: 600;
-  font-size: 0.9em;
+  font-size: 0.92em;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
@@ -112,74 +151,124 @@ function ensureDefaultStyles(): void {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: calc(22px * var(--ui-scale, 1));
-  background: linear-gradient(to top, rgba(16, 18, 26, 0.55), transparent 45%);
+  padding: clamp(14px, 2.2vh, 28px) clamp(14px, 2.4vw, 32px);
+  background: linear-gradient(to top, rgba(16, 18, 26, 0.52), transparent 48%);
 }
 
 .stapler-portrait-stage {
   position: relative;
-  height: calc(280px * var(--ui-scale, 1));
+  width: min(var(--stapler-box-max-width, 980px), 96%);
+  height: var(--stapler-portrait-height, clamp(250px, 48vh, 480px));
+  margin: 0 auto calc(-1 * var(--stapler-portrait-overlap, 48px));
   pointer-events: none;
-  margin-bottom: calc(-14px * var(--ui-scale, 1));
+  z-index: 1;
 }
 
-.stapler-portrait {
+.stapler-portrait-slot {
   position: absolute;
   bottom: 0;
-  max-height: 100%;
-  max-width: 30%;
+  height: 100%;
+  max-width: 44%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform-origin: bottom center;
+  transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+}
+
+.stapler-portrait-slot-left {
+  left: 2%;
+}
+
+.stapler-portrait-slot-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.stapler-portrait-slot-right {
+  right: 2%;
+}
+
+.stapler-portrait-slot.is-inactive {
+  z-index: 1;
+  opacity: 0.92;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35))
+    brightness(var(--stapler-portrait-inactive-brightness, 0.45))
+    saturate(0.65);
+  transform: scale(0.93) translateY(10px);
+}
+
+.stapler-portrait-slot-center.is-inactive {
+  transform: translateX(-50%) scale(0.93) translateY(10px);
+}
+
+.stapler-portrait-slot.is-speaking {
+  z-index: 2;
+  opacity: 1;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.55)) brightness(1.02);
+  transform: scale(1.03) translateY(-6px);
+}
+
+.stapler-portrait-slot-center.is-speaking {
+  transform: translateX(-50%) scale(1.03) translateY(-6px);
+}
+
+.stapler-portrait-img {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45)) brightness(0.84);
-  transition: transform 0.16s ease, filter 0.16s ease;
+  object-position: bottom center;
+  transition: transform 0.16s ease;
 }
 
-.stapler-portrait.is-speaking {
-  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55)) brightness(1);
-  transform: translateY(-6px);
+.stapler-portrait-img[data-flip='true'] {
+  transform: scaleX(-1);
 }
-
-.stapler-portrait-left { left: 4%; }
-.stapler-portrait-center { left: 50%; transform: translateX(-50%); }
-.stapler-portrait-center.is-speaking { transform: translateX(-50%) translateY(-6px); }
-.stapler-portrait-right { right: 4%; }
 
 .stapler-dialogue-box {
   position: relative;
-  width: min(920px, 96%);
+  z-index: 3;
+  width: min(var(--stapler-box-max-width, 980px), 96%);
   margin: 0 auto;
-  min-height: calc(140px * var(--ui-scale, 1));
-  background: rgba(250, 246, 238, 0.96);
-  color: #24262e;
-  border: 3px solid #2b2e3a;
-  border-radius: 14px;
-  padding: 1.05em 1.35em 1.6em;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+  min-height: var(--stapler-box-min-height, 9.2em);
+  font-size: calc(clamp(1.08rem, 0.95rem + 0.38vw, 1.48rem) * var(--stapler-text-scale, 1));
+  background: var(--stapler-box-bg, rgba(250, 246, 238, 0.97));
+  color: var(--stapler-box-text, #1d2028);
+  border: var(--stapler-box-border-width, 3px) solid var(--stapler-box-border, #232630);
+  border-radius: var(--stapler-box-radius, 14px);
+  padding: 1.15em 1.5em 1.75em;
+  box-shadow: var(--stapler-box-shadow, 0 14px 36px rgba(0, 0, 0, 0.45));
 }
 
 .stapler-dialogue-speaker {
   display: inline-block;
-  background: #2b2e3a;
-  color: #faf6ee;
+  font-family: var(--stapler-speaker-font, inherit);
+  background: var(--stapler-speaker-bg, #232630);
+  color: var(--stapler-speaker-text, #faf6ee);
+  border: 2px solid var(--stapler-speaker-border, transparent);
   font-weight: 700;
-  padding: 0.25em 0.85em;
+  padding: 0.24em 0.9em;
   border-radius: 8px;
   margin-bottom: 0.55em;
-  font-size: 0.95em;
+  font-size: 0.9em;
+  letter-spacing: 0.02em;
 }
 
 .stapler-dialogue-text {
-  line-height: 1.5;
-  font-size: 1.05em;
+  line-height: 1.52;
+  font-size: 1em;
   min-height: 3.1em;
 }
 
 .stapler-dialogue-hint {
   position: absolute;
-  right: 1.1em;
+  right: 1.2em;
   bottom: 0.65em;
-  font-size: 0.8em;
+  font-size: 0.74em;
   font-weight: 600;
-  color: #6b6f7e;
+  color: var(--stapler-hint-color, #656a79);
   transition: opacity 0.15s ease;
 }
 

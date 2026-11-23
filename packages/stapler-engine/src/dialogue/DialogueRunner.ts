@@ -5,11 +5,13 @@ import type { DialogueStatement } from './ScriptParser';
 export interface ActivePortrait {
   character: string;
   pose: string;
+  facing: 'left' | 'right';
 }
 
 export interface ActiveDialogueLine {
   speaker: string;
   lineKey: string;
+  append?: boolean;
 }
 
 export interface DialogueTransitionRequest {
@@ -21,6 +23,7 @@ export interface DialogueTransitionRequest {
 export interface DialogueStateSnapshot {
   active: boolean;
   waiting: boolean;
+  boxStyle: string;
   currentLine: ActiveDialogueLine | null;
   portraits: Partial<Record<PortraitSlot, ActivePortrait>>;
 }
@@ -49,6 +52,7 @@ export class DialogueRunner {
   private frames: ExecutionFrame[] = [];
   private active = false;
   private waitRemaining = 0;
+  private boxStyle = 'default';
   private currentLine: ActiveDialogueLine | null = null;
   private portraits: Partial<Record<PortraitSlot, ActivePortrait>> = {};
   private pendingTransition: DialogueTransitionRequest | undefined;
@@ -66,6 +70,7 @@ export class DialogueRunner {
     return {
       active: this.active,
       waiting: this.waitRemaining > 0,
+      boxStyle: this.boxStyle,
       currentLine: this.currentLine ? { ...this.currentLine } : null,
       portraits: {
         ...(this.portraits.left ? { left: { ...this.portraits.left } } : {}),
@@ -79,6 +84,7 @@ export class DialogueRunner {
     this.frames = [{ statements, index: 0 }];
     this.active = true;
     this.waitRemaining = 0;
+    this.boxStyle = 'default';
     this.currentLine = null;
     this.portraits = {};
     this.pendingTransition = undefined;
@@ -129,8 +135,18 @@ export class DialogueRunner {
           if (stmt.character === null || stmt.pose === null) {
             delete this.portraits[stmt.slot];
           } else {
-            this.portraits[stmt.slot] = { character: stmt.character, pose: stmt.pose };
+            // Visual novel convention: right-side portraits face left (inward), left/center face right
+            const defaultFacing: 'left' | 'right' = stmt.slot === 'right' ? 'left' : 'right';
+            this.portraits[stmt.slot] = {
+              character: stmt.character,
+              pose: stmt.pose,
+              facing: stmt.facing ?? defaultFacing,
+            };
           }
+          break;
+        }
+        case 'box': {
+          this.boxStyle = stmt.style;
           break;
         }
         case 'sfx': {
@@ -156,7 +172,11 @@ export class DialogueRunner {
           break;
         }
         case 'say': {
-          this.currentLine = { speaker: stmt.speaker, lineKey: stmt.lineKey };
+          this.currentLine = {
+            speaker: stmt.speaker,
+            lineKey: stmt.lineKey,
+            ...(stmt.append ? { append: true } : {}),
+          };
           this.callbacks.onStateChanged?.(this.getSnapshot());
           return;
         }

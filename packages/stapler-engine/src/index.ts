@@ -59,6 +59,12 @@ export type {
   DialogueRunnerCallbacks,
 } from './dialogue/DialogueRunner';
 export { I18nStore } from './dialogue/I18nStore';
+export {
+  TypewriterController,
+  parseInlineDialogueText,
+  stripInlineDialogueTags,
+} from './dialogue/TypewriterText';
+export type { InlineTextToken, TypewriterAdvanceResult } from './dialogue/TypewriterText';
 
 export { AudioManager, SfxConcurrencyLimiter } from './audio/AudioManager';
 export type { AudioTrackManifestEntry, QueuedSfxRequest } from './audio/AudioManager';
