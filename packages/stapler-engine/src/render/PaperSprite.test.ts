@@ -23,26 +23,32 @@ describe('PaperSprite', () => {
     expect(sprite.mesh.position.y).toBeCloseTo(0.9, 5);
   });
 
-  it('runs a deterministic horizontal paper-flip tween over flipDuration', () => {
+  it('runs a deterministic horizontal paper-flip tween keeping the lit front face (+Z) forward', () => {
     const sprite = new PaperSprite({
       texture: new THREE.Texture(),
       worldHeight: 2.0,
       flipDuration: 0.14,
     });
 
+    const getFirstU = () => sprite.mesh.geometry.getAttribute('uv').getX(0);
+
     expect(sprite.mesh.rotation.y).toBe(0);
+    expect(getFirstU()).toBe(0);
 
     sprite.setFacingRight(false);
-    sprite.update(0.07); // Halfway => smoothstep(0.5) = 0.5 => PI / 2
-    expect(sprite.mesh.rotation.y).toBeCloseTo(Math.PI / 2, 5);
+    sprite.update(0.07); // Halfway => edge-on (|rotY| = PI / 2), UV swaps to mirrored
+    expect(Math.abs(sprite.mesh.rotation.y)).toBeCloseTo(Math.PI / 2, 5);
+    expect(getFirstU()).toBe(1);
 
-    sprite.update(0.07); // Complete => PI
-    expect(sprite.mesh.rotation.y).toBeCloseTo(Math.PI, 5);
+    sprite.update(0.07); // Complete => returns to rotY = 0 (lit front normal) with mirrored UVs
+    expect(sprite.mesh.rotation.y).toBeCloseTo(0, 5);
+    expect(getFirstU()).toBe(1);
 
-    // Flipping back returns to 0
+    // Flipping back returns to rotY = 0 with unmirrored UVs
     sprite.setFacingRight(true);
     sprite.update(0.14);
     expect(sprite.mesh.rotation.y).toBeCloseTo(0, 5);
+    expect(getFirstU()).toBe(0);
     expect(sprite.getFacing()).toBe('right');
 
     // Tracks full 4-way facing while keeping horizontal paper-flip state consistent

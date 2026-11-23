@@ -43,10 +43,13 @@ export class PaperSprite {
   private readonly rows: number;
   private readonly animations: Record<string, SpriteAnimationClip>;
   private readonly baseMeshY: number;
+  private readonly uvRight = new THREE.BufferAttribute(new Float32Array([0, 1, 1, 1, 0, 0, 1, 0]), 2);
+  private readonly uvLeft = new THREE.BufferAttribute(new Float32Array([1, 1, 0, 1, 1, 0, 0, 0]), 2);
 
   private facing: FacingDirection = 'front';
   private facingRight = true;
-  private flipProgress = 0; // 0 = facing right (rotY=0), 1 = facing left (rotY=PI)
+  private mirroredUv = false;
+  private flipProgress = 0; // 0 = facing right, 1 = facing left (swaps UV at edge-on 0.5)
   private walkTime = 0;
   private isMoving = false;
 
@@ -78,6 +81,7 @@ export class PaperSprite {
     }
 
     const geometry = new THREE.PlaneGeometry(width, height);
+    geometry.setAttribute('uv', this.uvRight);
     this.baseMeshY = height * 0.5 - (options.groundOffset ?? 0);
 
     this.material = new THREE.MeshStandardMaterial({
@@ -226,7 +230,9 @@ export class PaperSprite {
       }
     }
 
-    // 2. Smooth horizontal paper-flip tween
+    // 2. Smooth horizontal paper-flip tween:
+    // Spins 0 -> +PI/2 (edge-on), mirrors UVs while edge-on, then completes -PI/2 -> 0
+    // so the lit front face (+Z normal) ALWAYS faces the camera & lights (zero shadowy backface).
     const target = this.facingRight ? 0 : 1;
     if (this.flipProgress !== target) {
       const step = this.flipDuration > 0 ? dt / this.flipDuration : 1;
@@ -237,7 +243,12 @@ export class PaperSprite {
       }
       // Smoothstep easing for crisp tactile card turn
       const t = this.flipProgress * this.flipProgress * (3 - 2 * this.flipProgress);
-      this.mesh.rotation.y = t * Math.PI;
+      const shouldMirror = t >= 0.5;
+      if (shouldMirror !== this.mirroredUv) {
+        this.mirroredUv = shouldMirror;
+        this.mesh.geometry.setAttribute('uv', shouldMirror ? this.uvLeft : this.uvRight);
+      }
+      this.mesh.rotation.y = shouldMirror ? (t - 1) * Math.PI : t * Math.PI;
     }
 
     // 3. Subtle procedural walk bob + slight paper tilt while moving
