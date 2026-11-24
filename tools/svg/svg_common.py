@@ -21,7 +21,22 @@ DEFAULT_REF_CANDIDATES = (
     REPO_ROOT / "games/paper-expressions/public/assets/sprites/unua.svg",
     REPO_ROOT / "Unua.svg",
 )
-DEFAULT_PREVIEW_DIR = REPO_ROOT / ".cache" / "svg-previews"
+def default_preview_dir() -> Path:
+    """Return a writable preview output directory (.cache/svg-previews or /tmp fallback)."""
+    candidate = REPO_ROOT / ".cache" / "svg-previews"
+    try:
+        candidate.mkdir(parents=True, exist_ok=True)
+        probe = candidate / ".write_probe"
+        probe.write_text("", encoding="utf-8")
+        probe.unlink()
+        return candidate
+    except OSError:
+        fallback = Path(tempfile.gettempdir()) / "stapler-svg-previews"
+        fallback.mkdir(parents=True, exist_ok=True)
+        return fallback
+
+
+DEFAULT_PREVIEW_DIR = default_preview_dir()
 
 
 def register_svg_namespaces() -> None:
