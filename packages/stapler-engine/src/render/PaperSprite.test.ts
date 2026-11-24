@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { PaperSprite } from './PaperSprite';
+import { PaperSprite, computeSpriteCellAspect } from './PaperSprite';
 
 describe('PaperSprite', () => {
   it('enforces alphaTest cutout shadow invariants and groundOffset seating', () => {
@@ -147,5 +147,31 @@ describe('PaperSprite', () => {
     expect(spriteA.getCurrentFrame()).toBe(2);
     expect(spriteA.texture.offset.x).toBeCloseTo(0.5, 5);
     expect(spriteA.texture.offset.y).toBeCloseTo(0, 5);
+  });
+
+  it('computes per-cell aspect ratio for multi-frame sprite sheets and suppresses conflicting procedural bob', () => {
+    expect(computeSpriteCellAspect(512, 512, 1, 1)).toBeCloseTo(1.0, 5);
+    expect(computeSpriteCellAspect(2048, 512, 4, 1)).toBeCloseTo(1.0, 5);
+    expect(computeSpriteCellAspect(2048, 1024, 4, 2)).toBeCloseTo(1.0, 5);
+    expect(computeSpriteCellAspect(1600, 1000, 4, 2)).toBeCloseTo(0.8, 5);
+
+    const sprite = new PaperSprite({
+      texture: new THREE.Texture(),
+      worldHeight: 2.0,
+      groundOffset: 0.06,
+      columns: 4,
+      rows: 2,
+      animations: {
+        idle: { row: 0, frames: 1, fps: 1, loop: true },
+        walk_front: { row: 1, frames: 4, fps: 8, loop: true },
+      },
+      initialAnimation: 'walk_front',
+    });
+    const baseY = 2.0 * 0.5 - 0.06;
+
+    sprite.setMoving(true);
+    sprite.update(0.05);
+    expect(sprite.mesh.position.y).toBeCloseTo(baseY, 5);
+    expect(sprite.mesh.rotation.z).toBeCloseTo(0, 5);
   });
 });

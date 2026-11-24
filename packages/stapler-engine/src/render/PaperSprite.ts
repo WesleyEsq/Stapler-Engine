@@ -23,6 +23,24 @@ export interface PaperSpriteOptions {
    * multiple sprites sharing the same cached image maintain independent UV frames.
    */
   cloneTextureForSheet?: boolean;
+  /**
+   * Controls procedural sine-wave walk bob & Z-tilt while moving.
+   * Defaults to automatic: enabled for static 1-frame cutouts, disabled whenever
+   * a multi-frame animation clip (`frames > 1`) is playing so authored foot grounding stays locked.
+   */
+  proceduralWalkBob?: boolean;
+}
+
+/** Computes the width/height aspect ratio of a single cell inside a sprite sheet. */
+export function computeSpriteCellAspect(
+  renderWidth: number,
+  renderHeight: number,
+  columns = 1,
+  rows = 1,
+): number {
+  const cellW = renderWidth / Math.max(1, Math.floor(columns));
+  const cellH = renderHeight / Math.max(1, Math.floor(rows));
+  return cellW / Math.max(1, cellH);
 }
 
 /**
@@ -42,6 +60,7 @@ export class PaperSprite {
   private readonly columns: number;
   private readonly rows: number;
   private readonly animations: Record<string, SpriteAnimationClip>;
+  private readonly proceduralWalkBob: boolean | null;
   private readonly baseMeshY: number;
   private readonly uvRight = new THREE.BufferAttribute(new Float32Array([0, 1, 1, 1, 0, 0, 1, 0]), 2);
   private readonly uvLeft = new THREE.BufferAttribute(new Float32Array([1, 1, 0, 1, 1, 0, 0, 0]), 2);
@@ -66,6 +85,7 @@ export class PaperSprite {
     this.columns = Math.max(1, Math.floor(options.columns ?? 1));
     this.rows = Math.max(1, Math.floor(options.rows ?? 1));
     this.animations = options.animations ? { ...options.animations } : {};
+    this.proceduralWalkBob = options.proceduralWalkBob ?? null;
 
     const isSheet = this.columns > 1 || this.rows > 1;
     if (isSheet && (options.cloneTextureForSheet ?? true)) {
@@ -252,7 +272,14 @@ export class PaperSprite {
     }
 
     // 3. Subtle procedural walk bob + slight paper tilt while moving
-    if (this.isMoving) {
+    // (automatically suppressed during multi-frame walk clips so authored feet stay grounded)
+    const activeClip = this.currentAnimationName ? this.animations[this.currentAnimationName] : undefined;
+    const useProceduralBob =
+      this.proceduralWalkBob !== null
+        ? this.proceduralWalkBob
+        : !(activeClip && activeClip.frames > 1);
+
+    if (this.isMoving && useProceduralBob) {
       this.walkTime += dt * 11.5;
       const bob = Math.abs(Math.sin(this.walkTime)) * 0.08;
       const tilt = Math.sin(this.walkTime) * 0.04;

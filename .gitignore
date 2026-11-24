@@ -1,6 +1,31 @@
+# Dependencies & builds
 node_modules/
 dist/
 .vite/
 .cache/
+coverage/
 *.tsbuildinfo
+*.log
+
+# Local environment
+.env
+.env.local
+.env.*.local
+
+# Python tooling (tools/svg)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Inkscape, editors & OS metadata
+*~
+*.bak
+*.swp
+*.swo
+.vscode/
+.idea/
 .DS_Store
+Thumbs.db
+Desktop.ini
+.directory

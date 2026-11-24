@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import os
 import re
 import shutil
@@ -9,7 +10,7 @@ import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 SVG_NS = "http://www.w3.org/2000/svg"
 INKSCAPE_NS = "http://www.inkscape.org/namespaces/inkscape"
@@ -18,9 +19,13 @@ XLINK_NS = "http://www.w3.org/1999/xlink"
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REF_CANDIDATES = (
+    REPO_ROOT / "games/paper-expressions/public/assets/sprites/chloe.svg",
+    REPO_ROOT / "Chloe.svg",
     REPO_ROOT / "games/paper-expressions/public/assets/sprites/unua.svg",
     REPO_ROOT / "Unua.svg",
 )
+
+
 def default_preview_dir() -> Path:
     """Return a writable preview output directory (.cache/svg-previews or /tmp fallback)."""
     candidate = REPO_ROOT / ".cache" / "svg-previews"
@@ -55,6 +60,22 @@ def local_tag(elem: ET.Element) -> str:
     return str(tag)
 
 
+def parse_style_dict(style: str) -> dict[str, str]:
+    """Parse an inline SVG `style` attribute into a lowercase dict."""
+    out: dict[str, str] = {}
+    for part in style.split(";"):
+        if ":" in part:
+            k, v = part.split(":", 1)
+            out[k.strip().lower()] = v.strip().lower()
+    return out
+
+
+def effective_prop(elem: ET.Element, prop: str) -> str:
+    """Return an element's presentation attribute or inline style property (lowercased)."""
+    style = parse_style_dict(elem.attrib.get("style", ""))
+    return (elem.attrib.get(prop) or style.get(prop.lower()) or "").strip().lower()
+
+
 def require_binary(name: str, install_hint: str = "") -> str:
     """Locate a required system binary or raise a clear error."""
     path = shutil.which(name)
@@ -64,12 +85,17 @@ def require_binary(name: str, install_hint: str = "") -> str:
     return path
 
 
-def default_reference_svg() -> Optional[Path]:
-    """Return the workspace's default Unua style anchor SVG if present."""
+def default_reference_svg(exclude: Optional[Path] = None) -> Optional[Path]:
+    """Return the workspace's default style anchor SVG (preferring another anchor over self)."""
+    resolved_excl = exclude.resolve() if exclude is not None else None
+    fallback: Optional[Path] = None
     for candidate in DEFAULT_REF_CANDIDATES:
         if candidate.is_file():
-            return candidate
-    return None
+            if fallback is None:
+                fallback = candidate
+            if resolved_excl is None or candidate.resolve() != resolved_excl:
+                return candidate
+    return fallback
 
 
 def parse_viewbox(root: ET.Element) -> Optional[Tuple[float, float, float, float]]:
@@ -166,3 +192,82 @@ def render_svg_to_png(
         raise RuntimeError(
             f"Inkscape failed to render '{svg_path}' (exit {proc.returncode}):\n{proc.stderr.strip()}"
         )
+
+
+def query_svg_bboxes(svg_path: Path) -> Dict[str, Tuple[float, float, float, float]]:
+    """Return true rendered viewBox bounding boxes `(x0, y0, x1, y1)` for every ID in `svg_path`.
+
+    Uses `inkscape --query-all` calibrated against an injected viewBox reference rect so
+    arbitrary transforms (`matrix(...)`, `rotate(...)`) and Inkscape `path-effect`s resolve
+    accurately into viewBox units regardless of document unit (`mm`, `px`, etc.).
+    """
+    inkscape = require_binary("inkscape", "install Inkscape to query SVG element bounds")
+    register_svg_namespaces()
+    tree = ET.parse(svg_path)
+    root = copy.deepcopy(tree.getroot())
+    vb = parse_viewbox(root)
+    if vb is None:
+        raise RuntimeError(f"SVG '{svg_path}' is missing a valid viewBox attribute.")
+
+    min_x, min_y, vb_w, vb_h = vb
+    calib_id = "__stapler_vb_calib__"
+
+    # Assign deterministic synthetic IDs to any unnamed elements just in case, though callers read existing IDs
+    calib_rect = ET.Element(
+        f"{{{SVG_NS}}}rect",
+        {
+            "id": calib_id,
+            "x": str(min_x),
+            "y": str(min_y),
+            "width": str(vb_w),
+            "height": str(vb_h),
+            "fill": "#000000",
+            "fill-opacity": "0.01",
+            "stroke": "none",
+        },
+    )
+    root.append(calib_rect)
+
+    with tempfile.TemporaryDirectory(prefix="stapler_svg_query_") as tmp:
+        probe_svg = Path(tmp) / "probe.svg"
+        ET.ElementTree(root).write(probe_svg, encoding="utf-8", xml_declaration=True)
+        proc = subprocess.run(
+            [inkscape, "--query-all", str(probe_svg)],
+            env=_inkscape_env(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"Inkscape --query-all failed on '{svg_path}' (exit {proc.returncode}):\n{proc.stderr.strip()}"
+            )
+
+    raw_boxes: Dict[str, Tuple[float, float, float, float]] = {}
+    for line in proc.stdout.splitlines():
+        parts = line.strip().split(",")
+        if len(parts) != 5:
+            continue
+        eid = parts[0].strip()
+        try:
+            qx, qy, qw, qh = float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])
+            raw_boxes[eid] = (qx, qy, qw, qh)
+        except ValueError:
+            continue
+
+    if calib_id not in raw_boxes:
+        raise RuntimeError(f"Calibration rect missing from inkscape --query-all output for '{svg_path}'.")
+
+    cx0, cy0, cw, ch = raw_boxes.pop(calib_id)
+    cw = max(cw, 1e-6)
+    ch = max(ch, 1e-6)
+
+    bboxes_vb: Dict[str, Tuple[float, float, float, float]] = {}
+    for eid, (qx, qy, qw, qh) in raw_boxes.items():
+        x0 = min_x + ((qx - cx0) / cw) * vb_w
+        y0 = min_y + ((qy - cy0) / ch) * vb_h
+        x1 = x0 + (qw / cw) * vb_w
+        y1 = y0 + (qh / ch) * vb_h
+        bboxes_vb[eid] = (x0, y0, x1, y1)
+
+    return bboxes_vb

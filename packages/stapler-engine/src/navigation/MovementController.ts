@@ -235,7 +235,7 @@ export class MovementController {
 
     if (!this.enabled) {
       this.sprite.setMoving(false);
-      this.sprite.playAnimation('idle');
+      this.playIdleAnimation();
       return;
     }
 
@@ -274,7 +274,7 @@ export class MovementController {
           const toActivate = this.pendingInteractable;
           this.cancelPath();
           this.sprite.setMoving(false);
-          this.sprite.playAnimation('idle');
+          this.playIdleAnimation();
           this.interactions.activateInteractable(toActivate);
           this.afterPositionUpdate(pos.x, pos.z);
           return;
@@ -298,7 +298,7 @@ export class MovementController {
           this.pendingInteractable = null;
           this.clickMarker.visible = false;
           this.sprite.setMoving(false);
-          this.sprite.playAnimation('idle');
+          this.playIdleAnimation();
           if (toActivate) {
             const tPos = getTargetPos(toActivate);
             if (Math.hypot(tPos.x - next.x, tPos.z - next.z) <= toActivate.interactionRadius + 0.35) {
@@ -325,7 +325,7 @@ export class MovementController {
       if (movedDist < step * 0.08) {
         this.cancelPath();
         this.sprite.setMoving(false);
-        this.sprite.playAnimation('idle');
+        this.playIdleAnimation();
         this.afterPositionUpdate(pos.x, pos.z);
         return;
       }
@@ -344,8 +344,16 @@ export class MovementController {
     }
 
     this.sprite.setMoving(false);
-    this.sprite.playAnimation('idle');
+    this.playIdleAnimation();
     this.afterPositionUpdate(pos.x, pos.z);
+  }
+
+  private playIdleAnimation(): void {
+    if (this.sprite.getFacing() === 'back' && this.sprite.hasAnimation('idle_back')) {
+      this.sprite.playAnimation('idle_back');
+    } else {
+      this.sprite.playAnimation('idle');
+    }
   }
 
   private updateSpriteFacing(dirX: number, dirZ: number): void {
@@ -362,7 +370,7 @@ export class MovementController {
   private applyMovementAnimation(moving: boolean, dirZ: number): void {
     this.sprite.setMoving(moving);
     if (!moving) {
-      this.sprite.playAnimation('idle');
+      this.playIdleAnimation();
       return;
     }
     if (dirZ < -0.5 && this.sprite.hasAnimation('walk_back')) {

@@ -11,7 +11,7 @@ import type { AssetManager } from './AssetManager';
 import { DebugOverlay } from '../render/DebugOverlay';
 import { FixedCamera } from '../render/FixedCamera';
 import { LightingRig } from '../render/LightingRig';
-import { PaperSprite } from '../render/PaperSprite';
+import { PaperSprite, computeSpriteCellAspect } from '../render/PaperSprite';
 import type { PropLoader } from '../render/PropLoader';
 import type { SvgTextureLoader } from '../render/SvgTextureLoader';
 import { TileMapBuilder, type BuiltTileMap } from '../render/TileMapBuilder';
@@ -380,7 +380,12 @@ export class SceneManager {
       height: spec.renderHeight,
       scope,
     });
-    const aspect = spec.renderWidth / Math.max(1, spec.renderHeight);
+    const aspect = computeSpriteCellAspect(
+      spec.renderWidth,
+      spec.renderHeight,
+      spec.columns,
+      spec.rows,
+    );
     return new PaperSprite({
       texture: tex,
       worldHeight: overrideWorldHeight ?? spec.worldHeight,

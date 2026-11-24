@@ -446,13 +446,14 @@ def _build_panel_shadow(
 
 
 def _build_panel_light(target_img: Image.Image, size: int) -> Image.Image:
-    panel = Image.new("RGBA", (size, size), (224, 224, 224, 255))
+    # Cool snow / overcast pavement checkerboard for Paper expressions' snowy equatorial setting
+    panel = Image.new("RGBA", (size, size), (237, 242, 248, 255))
     draw = ImageDraw.Draw(panel)
     tile = 16
     for y in range(0, size, tile):
         for x in range(0, size, tile):
             if ((x // tile) + (y // tile)) % 2 == 1:
-                draw.rectangle([x, y, x + tile - 1, y + tile - 1], fill=(206, 206, 206, 255))
+                draw.rectangle([x, y, x + tile - 1, y + tile - 1], fill=(219, 228, 238, 255))
 
     fitted, ox, oy, _ = _fit_contain(target_img, size, size)
     panel.alpha_composite(fitted, (ox, oy))
@@ -492,7 +493,7 @@ def compose_diagnostic_sheet(
         (0, 0, f"1. Grid & Guides ({cols}x{rows}, floor y=96)", p1),
         (1, 0, "2. Scale & Style vs Anchor", p2),
         (0, 1, "3. alphaTest=0.5 Shadow Silhouette", p3),
-        (1, 1, "4. Light-Surface Contrast Check", p4),
+        (1, 1, "4. Snow / Light-Surface Contrast", p4),
     ]
     for col, row, title, img in panels:
         x = gap + col * (cell_w + gap)
@@ -541,7 +542,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     ref_path: Optional[Path] = None
     if not args.no_ref:
-        ref_path = args.ref.resolve() if args.ref else default_reference_svg()
+        ref_path = args.ref.resolve() if args.ref else default_reference_svg(exclude=svg_path)
         if ref_path is not None and not ref_path.is_file():
             report.warnings.append(f"Reference SVG not found: {ref_path}")
             ref_path = None
@@ -583,8 +584,13 @@ def main(argv: Optional[List[str]] = None) -> int:
             report=report,
             panel_size=args.size,
         )
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        sheet.save(out_path, format="PNG")
+        try:
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            sheet.save(out_path, format="PNG")
+        except OSError:
+            out_path = Path(tempfile.gettempdir()) / "stapler-svg-previews" / out_path.name
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            sheet.save(out_path, format="PNG")
 
     print(f"SVG Preview: {out_path}")
     print(f"Lint Status: {report.status}  ({svg_path.name}, viewBox={vb[0]:g} {vb[1]:g} {vb[2]:g} {vb[3]:g}, grid={cols}x{rows})")

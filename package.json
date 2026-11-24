@@ -11,6 +11,12 @@
     "typecheck": "npm --workspace @stapler/engine run typecheck && npm --workspace @stapler/paper-expressions run typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
+    "svg:inspect": "python3 tools/svg/svg_inspect.py",
+    "svg:rig": "python3 tools/svg/svg_rig.py",
+    "svg:npc": "python3 tools/svg/svg_npc.py",
+    "svg:pose": "python3 tools/svg/svg_pose.py",
+    "svg:workbook": "python3 tools/svg/svg_workbook.py",
+    "svg:compile-sheet": "python3 tools/svg/svg_compile_sheet.py",
     "svg:preview": "python3 tools/svg/svg_preview.py",
     "svg:border": "python3 tools/svg/svg_border.py",
     "svg:pack": "python3 tools/svg/svg_pack.py"

@@ -20,7 +20,7 @@ import {
   createDefaultSettings,
   type SaveStorageAdapter,
 } from '../persistence/SaveManager';
-import { PaperSprite } from '../render/PaperSprite';
+import { PaperSprite, computeSpriteCellAspect } from '../render/PaperSprite';
 import { PropLoader } from '../render/PropLoader';
 import { SvgTextureLoader } from '../render/SvgTextureLoader';
 import { ViewportManager } from '../render/ViewportManager';
@@ -163,7 +163,12 @@ export class EngineApp {
     this.playerSprite = new PaperSprite({
       texture: playerTex,
       worldHeight: playerSpec.worldHeight,
-      aspectRatio: playerSpec.renderWidth / Math.max(1, playerSpec.renderHeight),
+      aspectRatio: computeSpriteCellAspect(
+        playerSpec.renderWidth,
+        playerSpec.renderHeight,
+        playerSpec.columns,
+        playerSpec.rows,
+      ),
       alphaTest: 0.5,
       groundOffset: 0.06,
       columns: playerSpec.columns,

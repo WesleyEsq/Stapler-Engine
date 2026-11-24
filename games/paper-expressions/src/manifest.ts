@@ -6,7 +6,7 @@ export const PAPER_EXPRESSIONS_MANIFEST: GameManifest = {
   supportedLocales: ['en', 'es'],
   initialEnvironmentId: 'main_studio',
   initialSpawnId: 'spawn_start',
-  playerSpriteId: 'unua',
+  playerSpriteId: 'chloe',
   maxConcurrentSfx: 8,
   maxSaveSlots: 10,
   enableAutosave: true,
@@ -38,6 +38,19 @@ export const PAPER_EXPRESSIONS_MANIFEST: GameManifest = {
     portraitDefaultFacing: 'right',
   },
   sprites: {
+    chloe: {
+      id: 'chloe',
+      svgUrl: '/assets/sprites/chloe_sheet.svg',
+      renderWidth: 2046,
+      renderHeight: 682,
+      worldHeight: 2.05,
+      columns: 6,
+      rows: 2,
+      animations: {
+        idle: { row: 0, frames: 1, fps: 1, loop: true },
+        walk_front: { row: 1, frames: 6, fps: 10, loop: true },
+      },
+    },
     unua: {
       id: 'unua',
       svgUrl: '/assets/sprites/unua.svg',
@@ -54,6 +67,9 @@ export const PAPER_EXPRESSIONS_MANIFEST: GameManifest = {
     },
   },
   portraits: {
+    chloe: {
+      default: '/assets/sprites/chloe.svg',
+    },
     unua: {
       default: '/assets/sprites/unua.svg',
     },

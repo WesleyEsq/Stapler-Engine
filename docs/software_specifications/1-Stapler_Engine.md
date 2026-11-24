@@ -79,16 +79,16 @@ The engine specializes in a very specific type of game: a hybrid between a visua
 
 ## The test game
 
-Paper expressions: A day about a girl going to her computer science university class from her apartment, who falls downstairs and uncovers she's a robot to the player. She then goes about her day trying to avoid getting caught, going to class, returning to the apartment, and finally heading home, where she is greeted by the professor who invented her.
+Paper expressions: Set in an equatorial country after global cooling brought cold weather and light snow to the tropics—and caused a severe decline in the human population. The story follows a day in the life of Chloe Relay, a sleepy android going from her apartment to her computer science university class, who falls downstairs and reveals to the player that she is a robot. She then goes about her chilly day trying to blend in without getting caught, attending class, and returning home, where she is greeted by the professor who invented her.
 
 ### Mechanics:
 
 1. For game progression, the character moves scene to scene; this game tells a focused 15-minute story.
-2. The environments are:
+2. The environments (framed around a chilly, lightly snowy equatorial city and campus) are:
     + High-floor tower apartment hallway
     + Lower-floor tower apartment hallway (similar layout, different doors)
-    + Front road
-    + Campus
+    + Front road (cold exterior street with light snow patches)
+    + Campus (chilly outdoor university grounds with light snow)
     + Classroom
     + Apartment interior
 3. Goal:
@@ -97,24 +97,27 @@ Paper expressions: A day about a girl going to her computer science university c
     + Showcase a day cycle for a character
     + Full-fledged environments to battle-test the framework
 
-There isn't a sprawling plot for this — it's a focused character introduction, a sort of prologue. Chloe is an android with the purpose of infiltrating human society, part of a scheme to repopulate the country with robots.
+There isn't a sprawling plot for this — it's a focused character introduction, a sort of prologue. Chloe is an android built to infiltrate everyday society as part of a state-backed scheme to repopulate the cold, underpopulated country with robots.
 
-### Visual Art Direction (Production Style):
+### Visual Art Direction & Asset Workflow (Production Style):
 
-* **Style Anchor:** Lineless, flat-shaded geometric vector shapes inside a crisp white paper-cutout border (established in [Unua.svg](../Unua.svg)), authored natively in Inkscape SVGs (`viewBox="0 0 100 100"`, feet anchored cleanly near the bottom baseline for consistent 3D grounding).
-* **Character Variety:** Characters share the same clean geometric paper-cutout language and two-tone flat shading, while remaining visually distinct through varied heights, silhouettes (trousers vs. skirts vs. coats), hairstyles, signature eye/brow geometry, and distinct color palettes.
+* **Style Anchor:** Lineless, flat-shaded geometric vector shapes inside a crisp `#f9f9f9` paper-cutout border (anchored by [Chloe.svg](../../Chloe.svg) and [Unua.svg](../../Unua.svg)), authored natively in Inkscape SVGs (`viewBox="0 0 100 100"`, boots/shoes anchored cleanly near `y = 96` for consistent 3D grounding) and contrasted against cool, lightly snowy exterior environments and warm interior lighting.
+* **Authoring Split (Human-First + AI-Assisted):**
+    + **Main Characters:** Designed by hand in Inkscape by the developer, then rigged into semantic groups, lightly polished, bordered, and given simple puppet walk/idle animations and facial expressions through the `tools/svg/` CLI pipeline with developer feedback checkpoints.
+    + **Background NPCs:** Built by decorating a shared pre-rigged base mannequin (`tools/svg/templates/base_npc.svg`) with winter clothing, hair, and palettes rather than drawing figures from scratch.
+* **Character Variety:** Characters share the same clean geometric paper-cutout language and flat shading, while remaining visually distinct through varied heights, winter silhouettes (coats, scarves, skirts, lab coats), hairstyles, signature eye/brow geometry, and distinct color palettes that stay legible against pale snow.
 
 ### Main character:
 
 **Name:** Chloe Relay
 
-**Main point:** An orange-themed android, extremely humanlike with subtle mechanical tells (cables, camera-lens eyes).
+**Main point:** A warm-toned android, extremely humanlike with subtle mechanical tells uncovered after her fall.
 
-**Personality:** Sleepy, distant personality, trying and failing to fit in without being a social reject. Soft and barely smiling.
+**Personality:** Sleepy, quiet, slightly distant personality, trying (and awkwardly struggling) to fit into cold everyday student life without standing out. Soft expression and barely smiling.
 
-**Color scheme:** White, black, and orange; wears an orange shirt with dark gray trousers, a comfortable outfit, plus a scrub for her biology class. Light orange hair.
+**Visual design & color scheme:** Warm copper-orange bob hair (`#c87137`) with a small dark-red rose hairclip on the left side; cozy crimson/burgundy winter coat (`#880000`–`#a40000`) with dark brown-black collar and cuffs (`#280b0b`); dark olive-brown winter skirt (`#483e37`), warm brown tights/leggings (`#6c5d53`), and dark rounded boots (`#333333`). Reference SVG: [Chloe.svg](../../Chloe.svg).
 
-**Favorite food:** Cannot eat or drink, which creates problems for maintaining normalcy.
+**Favorite food:** Cannot eat or drink (including hot drinks in the cold weather), which creates awkward problems for maintaining normalcy.
 
 ### Other characters
 

@@ -18,6 +18,7 @@ from PIL import Image, ImageDraw
 from svg_common import (
     INKSCAPE_NS,
     SVG_NS,
+    effective_prop,
     local_tag,
     parse_viewbox,
     register_svg_namespaces,
@@ -26,15 +27,28 @@ from svg_common import (
 )
 
 TOKEN_RE = re.compile(r"[A-Za-z]|[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?")
+LIGHT_BACKDROP_FILLS = {"#f9f9f9", "#fafafa", "#ffffff", "white"}
 
 
-def _remove_existing_border(root: ET.Element, border_id: str) -> int:
+def _remove_existing_border(root: ET.Element, border_id: str, replace_backdrop: bool = False) -> int:
     removed = 0
     for parent in root.iter():
         to_remove = [child for child in list(parent) if child.attrib.get("id") == border_id]
         for child in to_remove:
             parent.remove(child)
             removed += 1
+
+    if removed == 0 and replace_backdrop:
+        # Also check if the very first visual shape in the primary layer is a hand-drawn #f9f9f9 backdrop
+        target_parent = _find_insertion_parent(root)
+        for child in list(target_parent):
+            tag = local_tag(child)
+            if tag in ("defs", "namedview", "metadata", "title", "desc"):
+                continue
+            if tag in ("path", "polygon", "rect") and effective_prop(child, "fill") in LIGHT_BACKDROP_FILLS:
+                target_parent.remove(child)
+                removed += 1
+            break
     return removed
 
 
@@ -211,6 +225,7 @@ def generate_cutout_border(
     keep_holes: bool = False,
     opttolerance: float = 0.45,
     floor_clip: Optional[float] = 97.0,
+    replace_backdrop: bool = False,
 ) -> Tuple[bool, Tuple[float, float, float, float]]:
     """Bake a smooth paper-cutout border path into `out_path`.
 
@@ -229,7 +244,7 @@ def generate_cutout_border(
     min_x, min_y, vb_w, vb_h = vb
     # Work on a clean borderless copy for rasterization
     clean_root = copy.deepcopy(root)
-    _remove_existing_border(clean_root, border_id)
+    _remove_existing_border(clean_root, border_id, replace_backdrop=replace_backdrop)
 
     scale = min(5.0, 2000.0 / max(vb_w, vb_h))
     render_w = max(64, int(round(vb_w * scale)))
@@ -315,7 +330,7 @@ def generate_cutout_border(
         d_baked = _parse_potrace_svg(traced_svg, vb, render_w, render_h)
 
     # Inject clean <path id="cutout_border"> as the first child of the primary layer
-    _remove_existing_border(root, border_id)
+    _remove_existing_border(root, border_id, replace_backdrop=replace_backdrop)
     target_parent = _find_insertion_parent(root)
     border_elem = ET.Element(
         f"{{{SVG_NS}}}path",
@@ -357,6 +372,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--opttolerance", type=float, default=0.45, help="Potrace curve smoothing tolerance (default: 0.45).")
     parser.add_argument("--floor-clip", type=float, default=97.0, help="Trim bottom of cutout border flat at this SVG Y coordinate (default: 97.0, matching Unua).")
     parser.add_argument("--no-floor-clip", action="store_true", help="Disable flat bottom floor trimming (for floating props like clouds).")
+    parser.add_argument("--replace-backdrop", action="store_true", help="Also replace a leading hand-drawn #f9f9f9 backdrop path if id='cutout_border' is not set yet.")
     args = parser.parse_args(argv)
 
     svg_path = args.svg.resolve()
@@ -376,6 +392,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         keep_holes=args.keep_holes,
         opttolerance=args.opttolerance,
         floor_clip=floor_clip,
+        replace_backdrop=args.replace_backdrop,
     )
 
     print(f"Cutout border written: {out_path}")
