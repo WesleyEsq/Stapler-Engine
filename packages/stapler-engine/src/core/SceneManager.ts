@@ -319,7 +319,11 @@ export class SceneManager {
     this.playerSprite.setPosition(spawnPoint.x, spawnPoint.z);
     this.playerSprite.setFacing(spawnPoint.facing);
     this.playerSprite.setMoving(false);
-    this.playerSprite.playAnimation('idle');
+    if (spawnPoint.facing === 'back' && this.playerSprite.hasAnimation('idle_back')) {
+      this.playerSprite.playAnimation('idle_back');
+    } else {
+      this.playerSprite.playAnimation('idle');
+    }
     interactions.seedInitialPosition(spawnPoint.x, spawnPoint.z);
 
     // 7. Camera, DebugOverlay & MovementController

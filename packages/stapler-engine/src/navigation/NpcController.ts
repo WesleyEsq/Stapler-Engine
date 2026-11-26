@@ -95,7 +95,7 @@ export class NpcController {
       npc.sprite.setFacing(dz < 0 ? 'back' : 'front');
     }
     npc.sprite.setMoving(false);
-    npc.sprite.playAnimation('idle');
+    this.playIdleAnimation(npc.sprite);
   }
 
   /** Resumes an NPC's patrol after dialogue/interaction finishes. */
@@ -117,7 +117,7 @@ export class NpcController {
 
       if (!canPatrol) {
         npc.sprite.setMoving(false);
-        npc.sprite.playAnimation('idle');
+        this.playIdleAnimation(npc.sprite);
         npc.sprite.update(dt);
         continue;
       }
@@ -127,7 +127,7 @@ export class NpcController {
         if (npc.waitTimer - dt > 1e-6) {
           npc.waitTimer -= dt;
           npc.sprite.setMoving(false);
-          npc.sprite.playAnimation('idle');
+          this.playIdleAnimation(npc.sprite);
           npc.sprite.update(dt);
           continue;
         }
@@ -135,7 +135,7 @@ export class NpcController {
         npc.waitTimer = 0;
         if (moveDt <= 1e-6) {
           npc.sprite.setMoving(false);
-          npc.sprite.playAnimation('idle');
+          this.playIdleAnimation(npc.sprite);
           npc.sprite.update(dt);
           continue;
         }
@@ -162,7 +162,7 @@ export class NpcController {
           this.advanceWaypoint(npc);
         }
         npc.sprite.setMoving(false);
-        npc.sprite.playAnimation('idle');
+        this.playIdleAnimation(npc.sprite);
         npc.sprite.update(dt);
         continue;
       }
@@ -175,7 +175,7 @@ export class NpcController {
       // Politely yield if the player stands directly in the NPC's way
       if (this.wouldHitPlayer(nextX, nextZ, npc.solidRadius, ctx.playerPos, playerRadius + 0.12)) {
         npc.sprite.setMoving(false);
-        npc.sprite.playAnimation('idle');
+        this.playIdleAnimation(npc.sprite);
         npc.sprite.update(dt);
         continue;
       }
@@ -199,6 +199,14 @@ export class NpcController {
       }
 
       npc.sprite.update(dt);
+    }
+  }
+
+  private playIdleAnimation(sprite: PaperSprite): void {
+    if (sprite.getFacing() === 'back' && sprite.hasAnimation('idle_back')) {
+      sprite.playAnimation('idle_back');
+    } else {
+      sprite.playAnimation('idle');
     }
   }
 

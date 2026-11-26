@@ -535,9 +535,12 @@ def _apply_auto_walk_frame(
     leg_color: str,
     boot_color: str,
     bboxes: Dict[str, Tuple[float, float, float, float]],
+    back_view: bool = False,
 ) -> None:
     """Replace idle legs with 2-segment walking legs and apply arm swing + subtle head nod/bob."""
     kin = _walk_frame_kinematics(pose_kind, stride=stride)
+    arm_left_rot = kin["arm_right_rot"] if back_view else kin["arm_left_rot"]
+    arm_right_rot = kin["arm_left_rot"] if back_view else kin["arm_right_rot"]
     far_leg_color = _darken_hex(leg_color, 0.80)
     far_boot_color = _darken_hex(boot_color, 0.78)
 
@@ -610,10 +613,10 @@ def _apply_auto_walk_frame(
             tf = f"translate(0,{dy:.3g}) rotate({head_rot:.3g},{neck_x:.2f},{neck_y:.2f})"
             _prepend_transform(child, tf)
         elif base_id in ARM_LEFT_GROUPS:
-            tf = f"translate(0,{torso_dy:.3g}) rotate({kin['arm_left_rot']:.3g},{sh_l[0]:.2f},{sh_l[1]:.2f})"
+            tf = f"translate(0,{torso_dy:.3g}) rotate({arm_left_rot:.3g},{sh_l[0]:.2f},{sh_l[1]:.2f})"
             _prepend_transform(child, tf)
         elif base_id in ARM_RIGHT_GROUPS:
-            tf = f"translate(0,{torso_dy:.3g}) rotate({kin['arm_right_rot']:.3g},{sh_r[0]:.2f},{sh_r[1]:.2f})"
+            tf = f"translate(0,{torso_dy:.3g}) rotate({arm_right_rot:.3g},{sh_r[0]:.2f},{sh_r[1]:.2f})"
             _prepend_transform(child, tf)
 
 
@@ -638,6 +641,7 @@ def build_walk_workbook(
     cell_size: float = 100.0,
     leg_color_override: Optional[str] = None,
     boot_color_override: Optional[str] = None,
+    back_view: bool = False,
 ) -> None:
     register_svg_namespaces()
     src_root = ET.parse(source_svg).getroot()
@@ -729,6 +733,7 @@ def build_walk_workbook(
                 leg_color=leg_color,
                 boot_color=boot_color,
                 bboxes=bboxes,
+                back_view=back_view,
             )
         else:
             _apply_bob_only(frame_layer, base_bob * bob_amplitude)
@@ -755,6 +760,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--leg-color", type=str, default=None, help="Override leg/tights hex color (auto-detected from source SVG by default).")
     parser.add_argument("--boot-color", type=str, default=None, help="Override boot/shoe hex color (auto-detected from source SVG by default).")
     parser.add_argument("--no-ghosts", action="store_true", help="Omit dashed stride guide silhouettes in the locked guides layer.")
+    parser.add_argument("--back", action="store_true", help="Invert arm counter-swing for 3/4 back-view characters where the near arm is on the right.")
     args = parser.parse_args(argv)
 
     svg_path = args.svg.resolve()
@@ -773,6 +779,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         include_ghosts=not args.no_ghosts,
         leg_color_override=args.leg_color,
         boot_color_override=args.boot_color,
+        back_view=args.back,
     )
     mode = "auto-walk (2-segment bent-knee legs + arm swing + head nod)" if not args.blank_legs else "blank-legs (manual Inkscape sculpting)"
     print(f"Walk workbook written ({mode}): {out_path}")

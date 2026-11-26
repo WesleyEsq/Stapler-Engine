@@ -42,13 +42,15 @@ export const PAPER_EXPRESSIONS_MANIFEST: GameManifest = {
       id: 'chloe',
       svgUrl: '/assets/sprites/chloe_sheet.svg',
       renderWidth: 2046,
-      renderHeight: 682,
+      renderHeight: 1364,
       worldHeight: 2.05,
       columns: 6,
-      rows: 2,
+      rows: 4,
       animations: {
         idle: { row: 0, frames: 1, fps: 1, loop: true },
         walk_front: { row: 1, frames: 6, fps: 10, loop: true },
+        idle_back: { row: 2, frames: 1, fps: 1, loop: true },
+        walk_back: { row: 3, frames: 6, fps: 10, loop: true },
       },
     },
     unua: {

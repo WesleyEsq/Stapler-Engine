@@ -18,6 +18,19 @@
       "fps": 10,
       "loop": true,
       "workbook": "chloe_walk_front_workbook.svg"
+    },
+    "idle_back": {
+      "row": 2,
+      "fps": 1,
+      "loop": true,
+      "reborder": false,
+      "frames": ["chloe_back.svg"]
+    },
+    "walk_back": {
+      "row": 3,
+      "fps": 10,
+      "loop": true,
+      "workbook": "chloe_walk_back_workbook.svg"
     }
   }
 }

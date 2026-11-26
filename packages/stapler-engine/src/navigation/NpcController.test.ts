@@ -128,4 +128,40 @@ describe('NpcController', () => {
     controller.update(0.5, { mode: 'EXPLORE', playerPos: { x: 1, z: 1 } });
     expect(sprite.getPosition().x).toBeGreaterThan(5.5);
   });
+
+  it('switches a north-facing NPC from walk_back to idle_back when dialogue pauses patrol', () => {
+    const controller = new NpcController();
+    const sprite = new PaperSprite({
+      texture: new THREE.Texture(),
+      worldHeight: 2.0,
+      columns: 4,
+      rows: 4,
+      animations: {
+        idle: { row: 0, frames: 1, fps: 1, loop: true },
+        walk_front: { row: 1, frames: 4, fps: 8, loop: true },
+        idle_back: { row: 2, frames: 1, fps: 1, loop: true },
+        walk_back: { row: 3, frames: 4, fps: 8, loop: true },
+      },
+    });
+    sprite.setPosition(5, 6);
+
+    controller.addNpc({
+      id: 'walker',
+      sprite,
+      patrolPath: [
+        { x: 5, z: 6 },
+        { x: 5, z: 2 },
+      ],
+      patrolMode: 'once',
+      moveSpeed: 2.0,
+      waitAtWaypointSec: 0,
+    });
+
+    controller.update(0.2, { mode: 'EXPLORE', playerPos: { x: 1, z: 1 } });
+    expect(sprite.getFacing()).toBe('back');
+    expect(sprite.getCurrentAnimation()).toBe('walk_back');
+
+    controller.update(0.1, { mode: 'DIALOGUE', playerPos: { x: 1, z: 1 } });
+    expect(sprite.getCurrentAnimation()).toBe('idle_back');
+  });
 });

@@ -270,6 +270,7 @@ export class EngineApp {
       this.dialogueRunner?.stop();
     }
 
+    this.sceneManager.getActive()?.mover.setEnabled(false, { snapToIdle: true });
     this.fsm.transition('LOADING');
     this.ui.setInteractPrompt(null);
     this.lastNearestTarget = null;
@@ -307,27 +308,31 @@ export class EngineApp {
   async startDialogue(scriptId: string, npcId?: string): Promise<void> {
     if (!this.dialogueRunner || this.fsm.getMode() !== 'EXPLORE' || this.pendingAsyncAction) return;
     this.pendingAsyncAction = true;
+    this.sceneManager?.getActive()?.mover.setEnabled(false, { snapToIdle: true });
+    this.ui?.setInteractPrompt(null);
+    let started = false;
     try {
       const statements = await this.loadScript(scriptId);
       if (!statements || this.fsm.getMode() !== 'EXPLORE') return;
-
-      const active = this.sceneManager?.getActive();
-      active?.mover.setEnabled(false);
-      this.ui?.setInteractPrompt(null);
 
       this.activeDialogueNpcId = npcId ?? null;
       this.activeDialogueScriptId = scriptId;
       this.fsm.transition('DIALOGUE');
       this.bus.emit('dialogue:started', { scriptId });
+      started = true;
       this.dialogueRunner.start(statements);
     } finally {
       this.pendingAsyncAction = false;
+      if (!started && this.fsm.getMode() === 'EXPLORE') {
+        this.sceneManager?.getActive()?.mover.setEnabled(true);
+        this.refreshInteractPrompt();
+      }
     }
   }
 
   async openPauseMenu(): Promise<void> {
     if (!this.ui || this.fsm.getMode() !== 'EXPLORE') return;
-    this.sceneManager?.getActive()?.mover.setEnabled(false);
+    this.sceneManager?.getActive()?.mover.setEnabled(false, { snapToIdle: false });
     this.ui.setInteractPrompt(null);
     this.fsm.transition('PAUSED');
     const saves = await this.saves.listSaves();

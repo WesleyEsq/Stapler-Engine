@@ -93,13 +93,19 @@ export class MovementController {
     this.domElement.addEventListener('pointermove', this.onPointerMove);
   }
 
-  setEnabled(enabled: boolean, options: { interactCooldownSec?: number } = {}): void {
+  setEnabled(
+    enabled: boolean,
+    options: { interactCooldownSec?: number; snapToIdle?: boolean } = {},
+  ): void {
     this.enabled = enabled;
     if (!enabled) {
       this.keysDown.clear();
       this.cancelPath();
       this.setHovered(null);
       this.sprite.setMoving(false);
+      if (options.snapToIdle ?? true) {
+        this.playIdleAnimation();
+      }
     } else if (options.interactCooldownSec && options.interactCooldownSec > 0) {
       this.interactCooldown = Math.max(this.interactCooldown, options.interactCooldownSec);
     }
