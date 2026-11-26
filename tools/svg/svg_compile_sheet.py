@@ -22,6 +22,7 @@ from svg_common import (
     SVG_NS,
     local_tag,
     parse_viewbox,
+    preview_output_path,
     register_svg_namespaces,
     render_svg_to_png,
 )
@@ -341,7 +342,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 gif_path = (
                     args.gif_out.resolve()
                     if (args.gif_out is not None and len(gif_targets) == 1)
-                    else (DEFAULT_PREVIEW_DIR / f"{sprite_id}_{clip_name}_anim.gif")
+                    else preview_output_path(f"{sprite_id}_{clip_name}", "_anim.gif")
                 )
                 saved_gif = render_animated_gif(
                     frame_svgs=clip_frames,

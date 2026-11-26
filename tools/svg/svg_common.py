@@ -20,10 +20,41 @@ XLINK_NS = "http://www.w3.org/1999/xlink"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REF_CANDIDATES = (
     REPO_ROOT / "games/paper-expressions/public/assets/sprites/chloe.svg",
-    REPO_ROOT / "Chloe.svg",
+    REPO_ROOT / "Concept Art/Chloe.svg",
     REPO_ROOT / "games/paper-expressions/public/assets/sprites/unua.svg",
-    REPO_ROOT / "Unua.svg",
 )
+
+_PREVIEW_BUCKET_SUFFIXES = (
+    "_walk_front_workbook",
+    "_walk_back_workbook",
+    "_portrait_master",
+    "_walk_front",
+    "_walk_back",
+    "_walk_sheet",
+    "_workbook",
+    "_portrait",
+    "_clean_ref",
+    "_rigged",
+    "_sheet",
+    "_walk",
+    "_back",
+    "_front",
+    "_idle",
+)
+
+
+def preview_output_path(stem: str, suffix: str, base_dir: Optional[Path] = None) -> Path:
+    """Return an organized preview path like `.cache/svg-previews/<character>/<stem><suffix>`."""
+    norm = stem.strip().lower()
+    bucket = norm
+    for tail in _PREVIEW_BUCKET_SUFFIXES:
+        if bucket.endswith(tail) and len(bucket) > len(tail):
+            bucket = bucket[: -len(tail)]
+            break
+    if bucket == "base_npc":
+        bucket = "templates"
+    root_dir = base_dir if base_dir is not None else DEFAULT_PREVIEW_DIR
+    return root_dir / bucket / f"{norm}{suffix}"
 
 
 def default_preview_dir() -> Path:

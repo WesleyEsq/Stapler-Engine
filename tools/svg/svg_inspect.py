@@ -20,6 +20,7 @@ from svg_common import (
     effective_prop,
     local_tag,
     parse_viewbox,
+    preview_output_path,
     query_svg_bboxes,
     render_svg_to_png,
 )
@@ -283,7 +284,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     bboxes = query_svg_bboxes(svg_path)
     leaves, groups = collect_elements(root, bboxes, vb)
 
-    out_path = args.out.resolve() if args.out else (DEFAULT_PREVIEW_DIR / f"{svg_path.stem}_inspect.png")
+    out_path = args.out.resolve() if args.out else preview_output_path(svg_path.stem, "_inspect.png")
     if not args.no_image:
         out_path = render_annotated_map(svg_path, vb, leaves, out_path)
         print(f"Inspect Callout PNG: {out_path}")

@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" width="80mm" height="100mm" viewBox="0 0 80 100" version="1.1" id="svg_chloe_portrait" sodipodi:docname="chloe_portrait_master.svg">
+  <defs id="defs1">
+    <inkscape:path-effect effect="fillet_chamfer" id="path-effect35" is_visible="true" lpeversion="1" nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1" radius="0" unit="px" method="auto" mode="F" chamfer_steps="1" flexible="false" use_knot_distance="true" apply_no_radius="true" apply_with_radius="true" only_selected="false" hide_knots="false" />
+    <inkscape:path-effect effect="fillet_chamfer" id="path-effect26" is_visible="true" lpeversion="1" nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1" radius="0" unit="px" method="auto" mode="F" chamfer_steps="1" flexible="false" use_knot_distance="true" apply_no_radius="true" apply_with_radius="true" only_selected="false" hide_knots="false" />
+  </defs>
+  <g id="character_root">
+    <path id="cutout_border" fill="#f9f9f9" stroke="none" d="M38.06,4.4 c-8.3,0.7 -14.7,4.32 -18,10.2 c-2.24,3.98 -3.66,10.1 -3.66,15.8 c0,5.16 0.86,7.1 4.9,11.1 c2.98,2.92 3.24,3.3 3.78,5.12 c0.54,1.92 1.58,2.8 3.3,2.82 c2.32,0.04 2.44,0.44 1.18,4.04 c-0.54,1.54 -1.3,3.9 -1.7,5.22 c-0.38,1.32 -0.82,2.54 -0.98,2.7 c-0.5,0.6 -0.92,1.9 -0.98,3.1 c-0.02,0.66 -0.2,1.78 -0.4,2.48 c-0.8,2.98 0.44,5.28 3.1,5.7 c1.4,0.22 1.46,0.6 0.82,4 c-0.66,3.36 -0.24,4.66 1.78,5.46 c1.66,0.64 1.6,0.28 1.6,9.3 l0,7.96 l9,0 l9,0 l0.02,-7.46 c0,-4.08 0.08,-7.62 0.16,-7.84 c0.08,-0.22 0.6,-0.62 1.12,-0.9 c1.94,-1 2.14,-1.74 1.68,-6.1 c-0.44,-4.02 -0.42,-4.06 1.52,-4.54 c3.32,-0.84 4.26,-3.1 2.66,-6.46 c-0.3,-0.66 -0.56,-1.4 -0.56,-1.64 c0,-0.92 -0.46,-2.48 -0.92,-3.16 c-0.26,-0.4 -0.9,-1.78 -1.4,-3.06 c-0.52,-1.28 -1.46,-3.5 -2.12,-4.92 c-0.68,-1.44 -1.22,-2.86 -1.22,-3.14 c0,-0.4 0.6,-1.1 2.84,-3.28 c1.66,-1.62 3.24,-3.36 3.8,-4.2 c4.38,-6.54 5.1,-22.04 1.4,-29.68 c-3.2,-6.62 -10.56,-9.56 -21.72,-8.62 Z" />
+    <g id="portrait_scale" transform="translate(-16.5, -19.4) scale(1.18)">
+      <g id="hair_back">
+        <path style="fill:#c87137;stroke:#4a261c;stroke-width:0.50;stroke-linejoin:round" d="m 38.011506,55.711087 2.387347,-2.452986 1.837152,2.822273 3.536205,-1.799683 6.729716,1.574765 2.843248,-2.900922 0.872321,3.152976 c 0,0 4.486721,-3.535272 5.668248,-6.277828 1.181527,-2.742556 3.128922,-9.408096 1.298563,-18.338371 -1.875673,-9.151358 -11.56752,-8.703531 -14.149835,-8.640141 -2.828324,0.06943 -8.218913,-0.04718 -13.039513,4.104034 -4.820602,4.151208 -5.417192,12.096162 -5.354669,16.257044 0.09375,6.239275 5.783582,6.601798 7.041011,11.272338 z" id="path3" />
+        <path style="fill:#ad5d28;stroke:none" d="m 38.3,54.9 2.1,-2.1 1.9,2.8 3.5,-1.8 6.7,1.5 2.8,-2.8 0.9,3.0 c 1.7,-1.3 3.4,-3.1 4.4,-4.9 l -22.8,0.2 c 0.2,1.2 0.4,2.8 0.5,4.1 z" id="hair_back_lower_shade" />
+      </g>
+      <g id="legs_extended">
+        <rect style="fill:#6c5d53;stroke:#382e29;stroke-width:0.50" id="tights_left" width="3.6" height="21.0" x="44.5" y="80.5" />
+        <rect style="fill:#5b4d44;stroke:none" id="tights_left_shade" width="3.35" height="3.2" x="44.62" y="83.4" />
+        <rect style="fill:#6c5d53;stroke:#382e29;stroke-width:0.50" id="tights_right" width="3.6" height="21.0" x="50.7" y="80.5" />
+        <rect style="fill:#5b4d44;stroke:none" id="tights_right_shade" width="3.35" height="3.2" x="50.82" y="83.4" />
+      </g>
+      <g id="pose_default_back">
+        <path style="fill:#deaa87;stroke:#4a261c;stroke-width:0.46;stroke-linejoin:round" d="m 59.15,71.50 c 0,0 2.95,3.45 1.48,3.68 -1.46,0.23 -2.05,-1.76 -3.06,-1.29 -1.01,0.47 -0.77,-1.41 -0.77,-1.41 z" id="hand_right_default" />
+        <path style="fill:#8c0000;stroke:#3a0e0e;stroke-width:0.50;stroke-linejoin:round" d="m 51.00,52.95 c 2.60,3.80 6.80,12.00 8.45,17.80 c -1.05,0.80 -3.55,1.40 -4.55,1.10 c -1.15,-0.35 -3.95,-14.30 -4.15,-18.05 c -0.02,-0.50 0.02,-1.00 0.25,-0.85 z" id="sleeve_right_default" />
+        <path style="fill:#280b0b;stroke:#1a0707;stroke-width:0.42;stroke-linejoin:round" d="m 54.85,71.40 c 0,0 4.05,-2.05 4.45,-1.85 0.40,0.20 0.85,1.55 0.45,1.95 -0.40,0.40 -3.45,1.65 -4.25,1.40 -0.75,-0.25 -0.65,-1.50 -0.65,-1.50 z" id="cuff_right_default" />
+      </g>
+      <g id="torso">
+        <path style="fill:#483e37;stroke:#2c2520;stroke-width:0.50;stroke-linejoin:round" d="m 43.78,70.24 -2.46,13.24 c 0,0 6.00,1.51 8.31,0.54 1.84,-0.78 7.42,0.51 7.42,0.51 L 55.58,70.36 Z" id="skirt_main" />
+        <path style="fill:#3a312b;stroke:none" d="m 43.20,71.45 L 55.85,71.45 L 56.22,74.70 c -3.60,0.80 -9.35,0.80 -13.45,-0.15 Z" id="skirt_coat_shadow" />
+        <path style="fill:#880000;stroke:#3a0e0e;stroke-width:0.50;stroke-linejoin:round" d="m 45.80,53.00 c -0.55,1.65 -1.10,3.45 -1.55,5.25 c -1.10,4.35 -2.25,9.15 -2.95,12.35 c 1.75,1.65 6.85,2.15 9.25,0.65 c 2.15,1.30 4.65,0.65 5.80,-0.65 c -0.55,-2.95 -1.55,-6.95 -2.45,-10.10 c -0.75,-2.65 -1.75,-5.35 -2.70,-7.55 z" id="coat_body" />
+        <path style="fill:#760000;stroke:none" d="m 49.55,53.50 l 1.00,17.65 c 1.95,1.15 4.35,0.55 5.42,-0.62 c -0.54,-2.85 -1.52,-6.75 -2.40,-9.85 c -0.70,-2.45 -1.65,-4.95 -2.55,-7.18 z" id="coat_right_shade" />
+        <path style="fill:none;stroke:#4d0000;stroke-width:0.42;stroke-linecap:round" d="M 49.55,54.20 L 50.55,71.25" id="coat_placket" />
+        <circle style="fill:#4d0000;stroke:none" id="btn_1" cx="48.65" cy="57.4" r="0.55" />
+        <circle style="fill:#4d0000;stroke:none" id="btn_2" cx="48.90" cy="61.2" r="0.55" />
+        <circle style="fill:#4d0000;stroke:none" id="btn_3" cx="49.15" cy="65.0" r="0.55" />
+        <circle style="fill:#4d0000;stroke:none" id="btn_4" cx="49.40" cy="68.8" r="0.55" />
+      </g>
+      <g id="pose_default_front">
+        <path style="fill:#deaa87;stroke:#4a261c;stroke-width:0.46;stroke-linejoin:round" d="m 39.27789,71.225571 c -0.897285,2.106829 -1.848096,4.123583 -0.628836,4.090946 2.124512,-0.05687 1.785336,-2.133086 2.622799,-1.984117 0.837467,0.148968 1.754692,0.76612 1.455594,-0.170247 -0.299094,-0.936371 -0.159516,-1.532242 -0.159516,-1.532242 z" id="hand_left_default" />
+        <path style="fill:#940000;stroke:none" d="m 45.80,53.05 c -2.35,4.15 -5.35,12.15 -6.60,17.85 c 1.15,0.45 2.75,0.55 3.90,0.20 c 0.65,-3.65 1.35,-8.65 1.65,-12.85 c 0.15,-2.05 0.65,-3.85 1.65,-5.15 z" id="sleeve_left_default" />
+        <path style="fill:none;stroke:#3a0e0e;stroke-width:0.50;stroke-linecap:round;stroke-linejoin:round" d="m 45.80,53.05 c -2.35,4.15 -5.35,12.15 -6.60,17.85" id="sleeve_left_default_outer" />
+        <path style="fill:none;stroke:#3a0e0e;stroke-width:0.50;stroke-linecap:round;stroke-linejoin:round" d="m 43.10,71.10 c 0.65,-3.65 1.15,-8.75 1.30,-12.85" id="sleeve_left_default_inner" />
+        <path style="fill:#280b0b;stroke:#1a0707;stroke-width:0.42;stroke-linejoin:round" d="m 43.26636,72.342137 c -0.734332,0.321261 -1.24252,0.316886 -2.518394,0.150104 -1.275876,-0.16678 -1.646146,-0.376109 -1.963029,-0.943164 -0.316886,-0.567058 -0.108408,-0.950654 0.05003,-1.217504 0.158443,-0.266849 2.009711,-0.133425 2.735209,-0.01667 0.725498,0.116747 2.806318,0.678325 2.547807,1.111956 -0.258512,0.433631 -0.37145,0.705209 -0.42707,0.729542 z" id="cuff_left_default" />
+      </g>
+      <g id="collar">
+        <path style="fill:#280b0b;stroke:none" d="m 47.662226,52.827649 c 0,0 1.54471,0.315573 1.757188,0.288933 0.193429,-0.02425 1.202906,-0.336105 1.202906,-0.336105 l 0.02359,0.436346 c 0,0 -0.801939,0.324313 -1.084974,0.318418 -0.283038,-0.0059 -1.668738,-0.188693 -1.668738,-0.188693 z" id="collar_inner" />
+        <path style="fill:#280b0b;stroke:#1a0707;stroke-width:0.42;stroke-linejoin:round" d="m 46.212045,52.456161 c -0.499036,0.497428 -1.198013,1.120296 -0.686502,1.347694 0.511512,0.227394 3.119296,0.954682 3.580903,0.769922 0.461608,-0.184757 0.706524,-1.47124 0.377955,-1.510125 -0.574676,-0.06801 -3.272356,-0.607491 -3.272356,-0.607491 z" id="collar_left" />
+        <path style="fill:#280b0b;stroke:#1a0707;stroke-width:0.42;stroke-linejoin:round" d="m 50.049979,52.884618 c -0.598507,0.240074 -0.848306,0.0292 -0.451188,0.661183 0.397117,0.631985 0.164323,0.876162 0.985944,0.718164 0.821622,-0.157995 1.602161,-0.53144 1.492612,-0.976702 -0.109543,-0.44526 -0.69671,-0.936401 -0.69671,-0.936401 z" id="collar_right" />
+        <path style="fill:#c9926f;stroke:none" d="m 47.961926,52.031521 -0.0792,0.85 2.112345,0.0166 -0.104914,-0.83 z" id="neck_shadow" />
+      </g>
+      <g id="head">
+        <path style="fill:#deaa87;stroke:#4a261c;stroke-width:0.50;stroke-linejoin:round" d="m 48.967903,52.169117 c 8.138917,0.133423 12.308442,-6.804669 12.308442,-6.804669 0,-0.047 -0.365116,-11.209042 -0.466988,-14.111256 -0.09602,-2.735427 -6.075485,-4.447483 -12.660562,-4.369393 -6.270482,0.07436 -11.501405,2.481346 -13.544586,6.916525 -2.524607,5.450911 -0.332175,9.643234 1.458596,13.278078 1.79077,3.634844 5.074895,4.962352 12.905098,5.090715 z" id="path1" />
+        <path style="fill:#d19874;stroke:none" d="m 38.6,37.0 c 0,0 2.6,3.3 4.2,2.7 c 1.4,-0.5 1.8,-3.9 4.1,-3.9 c 2.3,0 2.9,3.3 4.4,3.0 c 1.4,-0.3 2.6,-4.2 3.5,-3.9 c 0.9,0.4 2.4,5.2 4.1,4.4 c 1.4,-0.7 2.2,-2.0 2.3,-3.0 l -0.2,-2.2 l -22.2,0.5 z" id="bangs_cast_shadow" />
+      </g>
+      <g id="expr_neutral">
+        <ellipse style="fill:#483737;stroke:none" id="neutral_eye_l" cx="46.15" cy="41.65" rx="1.05" ry="3.55" />
+        <ellipse style="fill:#483737;stroke:none" id="neutral_eye_r" cx="55.05" cy="41.35" rx="1.05" ry="3.55" />
+        <path style="fill:none;stroke:#483e37;stroke-width:0.82;stroke-linecap:round" d="m 48.55,48.75 l 3.55,-0.05" id="neutral_mouth" />
+      </g>
+      <g id="hair_front">
+        <path style="fill:#c87137;stroke:none" d="m 39.810115,50.538755 c 0,0 2.65,-0.80 1.65,-5.10 c -0.85,-3.65 -2.65,-6.95 -2.79,-9.22 l -5.63,-2.99 c 0,0 -2.158284,13.632941 2.007707,16.652001 4.16599,3.01906 4.764495,0.66042 4.764495,0.66042 z" id="path4" />
+        <path style="fill:#c87137;stroke:none" d="m 38.667077,36.216871 c 0,0 2.63245,3.405629 4.175347,2.815624 1.394239,-0.533158 1.799851,-3.985878 4.089154,-3.985878 2.289304,0 2.913451,3.353584 4.390866,3.036112 1.446663,-0.310864 2.592155,-4.288316 3.537734,-3.929445 0.945582,0.358871 2.387343,5.282342 4.050341,4.480521 1.926772,-0.929001 3.70,-4.45 3.60,-5.50 -0.10,-1.05 -1.45,-4.85 -3.15,-6.50 -1.75,-1.65 -9.05,-3.05 -13.25,-2.95 -4.15,0.10 -10.35,2.75 -12.00,8.10 -1.15,3.75 0.40,8.15 2.75,8.85 2.25,0.65 1.80,-4.40 1.80,-4.40 z" id="path5" />
+        <path style="fill:none;stroke:#4a261c;stroke-width:0.48;stroke-linecap:round;stroke-linejoin:round" d="m 38.667077,36.216871 c 0,0 2.63245,3.405629 4.175347,2.815624 1.394239,-0.533158 1.799851,-3.985878 4.089154,-3.985878 2.289304,0 2.913451,3.353584 4.390866,3.036112 1.446663,-0.310864 2.592155,-4.288316 3.537734,-3.929445 0.945582,0.358871 2.387343,5.282342 4.050341,4.480521 c 0.809,-0.390 1.662,-1.262 2.371,-2.228" id="hair_front_bangs_outline" />
+        <path style="fill:none;stroke:#4a261c;stroke-width:0.48;stroke-linecap:round;stroke-linejoin:round" d="m 35.045620,49.878335 c 4.16599,3.01906 4.764495,0.66042 4.764495,0.66042 c 0,0 2.65,-0.80 1.65,-5.10 c -0.85,-3.65 -2.65,-6.95 -2.79,-9.22" id="hair_front_sidelock_outline" />
+        <g id="hairpin_flower" transform="translate(36.3, 36.2) scale(1.55) translate(-35.9, -36.5)">
+          <rect style="fill:#225500;fill-opacity:1;stroke:none" id="rect33" width="3.7140954" height="3.9032471" x="42.570938" y="16.778276" transform="matrix(0.91091546,0.41259306,-0.2507772,0.96804483,0,0)" />
+          <rect style="fill:#800000;fill-opacity:1;stroke:none" id="rect34" width="3.6691833" height="3.7859299" x="34.056694" y="34.657108" />
+          <path style="fill:#550000;fill-opacity:1;stroke:none" id="rect35" width="2.8713832" height="3.2830362" x="48.854137" y="6.8023019" transform="matrix(0.79640141,0.55366208,-0.55543357,0.77779704,0.53454593,2.1222423)" inkscape:path-effect="#path-effect35" sodipodi:type="rect" d="m 49.192012,6.8023019 h 2.195634 c 0.187183,0 0.337875,0.6403184 0.337875,1.4356916 v 0.411653 c 0,0.7953732 -0.150692,1.4356915 -0.337875,1.4356915 h -2.195634 c -0.187183,0 -0.337875,-0.6403183 -0.337875,-1.4356915 v -0.411653 c 0,-0.7953732 0.150692,-1.4356916 0.337875,-1.4356916 z" ry="1.4356916" rx="0.33787432" />
+        </g>
+      </g>
+      <g id="expr_neutral_top">
+        <path style="fill:none;stroke:#483737;stroke-width:0.82;stroke-linecap:round" d="m 44.1,37.0 l 4.1,-0.22" id="neutral_brow_l" />
+        <path style="fill:none;stroke:#483737;stroke-width:0.82;stroke-linecap:round" d="m 53.0,36.7 l 4.1,0.22" id="neutral_brow_r" />
+      </g>
+    </g>
+  </g>
+</svg>

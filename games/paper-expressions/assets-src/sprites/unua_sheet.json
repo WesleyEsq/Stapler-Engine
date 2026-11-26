@@ -1,0 +1,36 @@
+{
+  "id": "unua",
+  "out": "../../public/assets/sprites/unua_sheet.svg",
+  "worldHeight": 2.1,
+  "columns": 6,
+  "padding": 3.2,
+  "floorClip": 97.0,
+  "animations": {
+    "idle": {
+      "row": 0,
+      "fps": 1,
+      "loop": true,
+      "reborder": false,
+      "frames": ["../../public/assets/sprites/unua.svg"]
+    },
+    "walk_front": {
+      "row": 1,
+      "fps": 10,
+      "loop": true,
+      "workbook": "unua_walk_front_workbook.svg"
+    },
+    "idle_back": {
+      "row": 2,
+      "fps": 1,
+      "loop": true,
+      "reborder": false,
+      "frames": ["unua_back.svg"]
+    },
+    "walk_back": {
+      "row": 3,
+      "fps": 10,
+      "loop": true,
+      "workbook": "unua_walk_back_workbook.svg"
+    }
+  }
+}

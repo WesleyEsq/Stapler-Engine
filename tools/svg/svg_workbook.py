@@ -118,8 +118,10 @@ def _build_kinematic_leg(
     leg_color: str,
     boot_color: str,
     leg_width: float = 3.25,
+    sock_color: Optional[str] = None,
+    sock_ratio: float = 0.78,
 ) -> ET.Element:
-    """Construct a crisp 2-segment geometric leg (thigh + knee cap + shin + 3/4 rounded boot)."""
+    """Construct a crisp 2-segment geometric leg (thigh + knee cap + shin + optional sock + 3/4 rounded boot)."""
     g = ET.Element(f"{{{SVG_NS}}}g", {"id": group_id})
 
     # Thigh (extends slightly above hip so it tucks cleanly under the skirt/coat hem)
@@ -157,6 +159,19 @@ def _build_kinematic_leg(
             "points": _segment_polygon_points(knee, ankle, leg_width, extend_start=0.1, extend_end=0.9),
         },
     )
+    if sock_color:
+        t = max(0.0, min(1.0, 1.0 - sock_ratio))
+        sock_top = (knee[0] + (ankle[0] - knee[0]) * t, knee[1] + (ankle[1] - knee[1]) * t)
+        ET.SubElement(
+            g,
+            f"{{{SVG_NS}}}polygon",
+            {
+                "id": f"{group_id}_sock",
+                "fill": sock_color,
+                "stroke": "none",
+                "points": _segment_polygon_points(sock_top, ankle, leg_width + 0.12, extend_start=0.0, extend_end=0.9),
+            },
+        )
 
     # 3/4 right-facing quarter-arch rounded boot matching Chloe/Unua's boot geometry
     # Local origin (0,0) = center of ankle top; sole bottom sits at y = +5.1
@@ -536,12 +551,15 @@ def _apply_auto_walk_frame(
     boot_color: str,
     bboxes: Dict[str, Tuple[float, float, float, float]],
     back_view: bool = False,
+    sock_color: Optional[str] = None,
+    sock_ratio: float = 0.78,
 ) -> None:
     """Replace idle legs with 2-segment walking legs and apply arm swing + subtle head nod/bob."""
     kin = _walk_frame_kinematics(pose_kind, stride=stride)
     arm_left_rot = kin["arm_right_rot"] if back_view else kin["arm_left_rot"]
     arm_right_rot = kin["arm_left_rot"] if back_view else kin["arm_right_rot"]
-    far_leg_color = _darken_hex(leg_color, 0.80)
+    far_leg_color = _darken_hex(leg_color, 0.85 if sock_color else 0.80)
+    far_sock_color = _darken_hex(sock_color, 0.80) if sock_color else None
     far_boot_color = _darken_hex(boot_color, 0.78)
 
     # Resolve true anatomical shoulder & neck pivots from the source character's bounding boxes
@@ -581,6 +599,8 @@ def _apply_auto_walk_frame(
         foot_angle_deg=far_cfg["foot_deg"],
         leg_color=far_leg_color,
         boot_color=far_boot_color,
+        sock_color=far_sock_color,
+        sock_ratio=sock_ratio,
     )
     near_leg_el = _build_kinematic_leg(
         group_id=f"{prefix}_leg_near",
@@ -590,6 +610,8 @@ def _apply_auto_walk_frame(
         foot_angle_deg=near_cfg["foot_deg"],
         leg_color=leg_color,
         boot_color=boot_color,
+        sock_color=sock_color,
+        sock_ratio=sock_ratio,
     )
 
     insert_at = first_leg_idx if first_leg_idx is not None else 0
@@ -642,6 +664,8 @@ def build_walk_workbook(
     leg_color_override: Optional[str] = None,
     boot_color_override: Optional[str] = None,
     back_view: bool = False,
+    sock_color: Optional[str] = None,
+    sock_ratio: float = 0.78,
 ) -> None:
     register_svg_namespaces()
     src_root = ET.parse(source_svg).getroot()
@@ -734,6 +758,8 @@ def build_walk_workbook(
                 boot_color=boot_color,
                 bboxes=bboxes,
                 back_view=back_view,
+                sock_color=sock_color,
+                sock_ratio=sock_ratio,
             )
         else:
             _apply_bob_only(frame_layer, base_bob * bob_amplitude)
@@ -758,6 +784,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--stride", type=float, default=1.0, help="Stride & arm-swing amplitude multiplier (default: 1.0).")
     parser.add_argument("--head-motion", type=float, default=1.0, help="Head vertical bob + nod tilt multiplier (default: 1.0).")
     parser.add_argument("--leg-color", type=str, default=None, help="Override leg/tights hex color (auto-detected from source SVG by default).")
+    parser.add_argument("--sock-color", type=str, default=None, help="Optional sock hex color covering the lower shin above the boot.")
+    parser.add_argument("--sock-ratio", type=float, default=0.78, help="Fraction of shin covered by --sock-color (default: 0.78).")
     parser.add_argument("--boot-color", type=str, default=None, help="Override boot/shoe hex color (auto-detected from source SVG by default).")
     parser.add_argument("--no-ghosts", action="store_true", help="Omit dashed stride guide silhouettes in the locked guides layer.")
     parser.add_argument("--back", action="store_true", help="Invert arm counter-swing for 3/4 back-view characters where the near arm is on the right.")
@@ -780,6 +808,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         leg_color_override=args.leg_color,
         boot_color_override=args.boot_color,
         back_view=args.back,
+        sock_color=args.sock_color,
+        sock_ratio=args.sock_ratio,
     )
     mode = "auto-walk (2-segment bent-knee legs + arm swing + head nod)" if not args.blank_legs else "blank-legs (manual Inkscape sculpting)"
     print(f"Walk workbook written ({mode}): {out_path}")

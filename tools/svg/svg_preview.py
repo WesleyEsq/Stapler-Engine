@@ -23,6 +23,7 @@ from svg_common import (
     local_tag,
     parse_grid_spec,
     parse_viewbox,
+    preview_output_path,
     render_svg_to_png,
 )
 
@@ -547,7 +548,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             report.warnings.append(f"Reference SVG not found: {ref_path}")
             ref_path = None
 
-    out_path = args.out.resolve() if args.out else (DEFAULT_PREVIEW_DIR / f"{svg_path.stem}_preview.png")
+    out_path = args.out.resolve() if args.out else preview_output_path(svg_path.stem, "_preview.png")
 
     # Compute raster resolution preserving viewBox aspect ratio (capped around panel_size * max(cols, rows))
     vb_w, vb_h = vb[2], vb[3]
