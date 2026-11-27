@@ -14,7 +14,11 @@ import { SceneManager, type SceneBuiltHook, type SceneSpawnRequest } from './Sce
 import { AudioManager } from '../audio/AudioManager';
 import { DialogueRunner } from '../dialogue/DialogueRunner';
 import { I18nStore } from '../dialogue/I18nStore';
-import { parseDialogueScript, type DialogueStatement } from '../dialogue/ScriptParser';
+import {
+  extractScriptAssets,
+  parseDialogueScript,
+  type DialogueStatement,
+} from '../dialogue/ScriptParser';
 import {
   SaveManager,
   createDefaultSettings,
@@ -74,9 +78,12 @@ export class EngineApp {
   private ui: UIOverlay | null = null;
 
   private readonly scriptCache = new Map<string, DialogueStatement[]>();
+  private readonly preloadedImageUrls = new Set<string>();
   private settings: UserSettings;
   private activeDialogueNpcId: string | null = null;
   private activeDialogueScriptId: string | null = null;
+  private activeVnFallback: { environmentId: string; spawnId?: string } | null = null;
+  private pauseReturnMode: 'EXPLORE' | 'DIALOGUE' = 'EXPLORE';
   private lastNearestTarget: InteractableTarget | null = null;
   private pendingAsyncAction = false;
 
@@ -185,6 +192,7 @@ export class EngineApp {
       supportedLocales: this.manifest.supportedLocales,
       slotIds: this.saves.getSlotIds(),
       portraits: this.manifest.portraits,
+      cgs: this.manifest.cgs,
       theme: this.manifest.uiTheme,
       onDialogueAdvance: () => this.dialogueRunner?.advance(),
       pauseCallbacks: {
@@ -200,11 +208,20 @@ export class EngineApp {
       onStateChanged: (snap) => this.ui?.dialogue.render(snap),
       onSfx: (soundId) => void this.audio.playSfx(soundId),
       onVoice: (voiceId) => void this.audio.playVoice(voiceId),
+      onBgm: ({ trackId, fadeSec }) => {
+        if (trackId === null) {
+          this.audio.stopBgm();
+        } else {
+          void this.audio.playBgm(trackId, fadeSec);
+        }
+      },
       onComplete: ({ transition }) => {
         const npcId = this.activeDialogueNpcId;
         const scriptId = this.activeDialogueScriptId;
+        const vnFallback = this.activeVnFallback;
         this.activeDialogueNpcId = null;
         this.activeDialogueScriptId = null;
+        this.activeVnFallback = null;
         this.audio.stopVoice();
 
         if (npcId) {
@@ -218,6 +235,10 @@ export class EngineApp {
           void this.transitionToEnvironment(transition.environmentId, {
             spawnId: transition.spawnId,
             facing: transition.facing,
+          });
+        } else if (vnFallback) {
+          void this.transitionToEnvironment(vnFallback.environmentId, {
+            spawnId: vnFallback.spawnId,
           });
         } else if (this.fsm.getMode() === 'DIALOGUE') {
           this.fsm.transition('EXPLORE');
@@ -260,24 +281,81 @@ export class EngineApp {
     spawnReq: SceneSpawnRequest = {},
     options: { skipAutosave?: boolean } = {},
   ): Promise<void> {
-    if (!this.sceneManager || !this.ui) return;
+    if (!this.sceneManager || !this.ui || !this.dialogueRunner) return;
+
+    const envCfg = this.manifest.environments[environmentId];
+    if (!envCfg) {
+      throw new Error(`Unknown environment "${environmentId}" in GameManifest.`);
+    }
 
     const prevMode = this.fsm.getMode();
     if (prevMode === 'PAUSED') {
       this.ui.pauseMenu.close();
     }
     if (prevMode === 'DIALOGUE') {
-      this.dialogueRunner?.stop();
+      this.dialogueRunner.stop();
     }
+    this.activeDialogueNpcId = null;
+    this.activeDialogueScriptId = null;
+    this.activeVnFallback = null;
 
     this.sceneManager.getActive()?.mover.setEnabled(false, { snapToIdle: true });
     this.fsm.transition('LOADING');
     this.ui.setInteractPrompt(null);
     this.lastNearestTarget = null;
 
-    const envCfg = this.manifest.environments[environmentId];
-    const roomTitle = envCfg ? this.i18n.getEnvironmentTitle(envCfg.titleKey) : environmentId;
+    const roomTitle = this.i18n.getEnvironmentTitle(envCfg.titleKey);
     this.ui.loading.show(`${this.i18n.getUi('loading_prefix', 'Loading')} ${roomTitle}...`);
+
+    if (envCfg.kind === 'vn') {
+      if (!envCfg.entryScriptId) {
+        throw new Error(`VN environment "${environmentId}" is missing required entryScriptId.`);
+      }
+
+      this.sceneManager.unloadCurrent();
+      if (this.playerSprite) {
+        this.playerSprite.root.visible = false;
+      }
+
+      this.state.environmentId = environmentId;
+      this.state.environmentTitleKey = envCfg.titleKey;
+
+      if (envCfg.bgmId) {
+        void this.audio.playBgm(envCfg.bgmId);
+      }
+
+      const statements = await this.loadScript(envCfg.entryScriptId);
+      if (statements) {
+        await this.preloadScriptAssets(statements);
+      }
+
+      this.ui.loading.hide();
+      this.fsm.transition('DIALOGUE');
+
+      if (!options.skipAutosave && prevMode !== 'BOOT' && this.saves.enableAutosave) {
+        await this.saveToSlot('autosave');
+      }
+
+      this.bus.emit('scene:loaded', { environmentId });
+
+      if (statements) {
+        this.activeDialogueScriptId = envCfg.entryScriptId;
+        this.activeVnFallback = envCfg.nextEnvironmentId
+          ? { environmentId: envCfg.nextEnvironmentId, spawnId: envCfg.nextSpawnId }
+          : null;
+        this.bus.emit('dialogue:started', { scriptId: envCfg.entryScriptId });
+        this.dialogueRunner.start(statements);
+      } else if (envCfg.nextEnvironmentId) {
+        void this.transitionToEnvironment(envCfg.nextEnvironmentId, {
+          spawnId: envCfg.nextSpawnId,
+        });
+      }
+      return;
+    }
+
+    if (this.playerSprite) {
+      this.playerSprite.root.visible = true;
+    }
 
     const active = await this.sceneManager.loadEnvironment(environmentId, spawnReq);
     this.viewport.attachCamera(active.fixedCamera.camera);
@@ -293,6 +371,34 @@ export class EngineApp {
 
     // Render 1 warm-up frame to compile shaders before revealing the scene
     this.viewport.renderer.render(this.threeScene, active.fixedCamera.camera);
+
+    const shouldPlayEntryScript =
+      Boolean(envCfg.entryScriptId) &&
+      (!envCfg.entryScriptOnceFlag || this.state.getFlag(envCfg.entryScriptOnceFlag) !== true);
+
+    if (shouldPlayEntryScript && envCfg.entryScriptId) {
+      const entryStatements = await this.loadScript(envCfg.entryScriptId);
+      if (entryStatements) {
+        await this.preloadScriptAssets(entryStatements);
+        if (envCfg.entryScriptOnceFlag) {
+          this.state.setFlag(envCfg.entryScriptOnceFlag, true);
+        }
+
+        this.ui.loading.hide();
+        active.mover.setEnabled(false, { snapToIdle: true });
+        this.fsm.transition('DIALOGUE');
+
+        if (!options.skipAutosave && prevMode !== 'BOOT' && this.saves.enableAutosave) {
+          await this.saveToSlot('autosave');
+        }
+
+        this.bus.emit('scene:loaded', { environmentId, spawnId: spawnReq.spawnId });
+        this.activeDialogueScriptId = envCfg.entryScriptId;
+        this.bus.emit('dialogue:started', { scriptId: envCfg.entryScriptId });
+        this.dialogueRunner.start(entryStatements);
+        return;
+      }
+    }
 
     this.ui.loading.hide();
     this.fsm.transition('EXPLORE');
@@ -314,6 +420,8 @@ export class EngineApp {
     try {
       const statements = await this.loadScript(scriptId);
       if (!statements || this.fsm.getMode() !== 'EXPLORE') return;
+      await this.preloadScriptAssets(statements);
+      if (this.fsm.getMode() !== 'EXPLORE') return;
 
       this.activeDialogueNpcId = npcId ?? null;
       this.activeDialogueScriptId = scriptId;
@@ -331,9 +439,13 @@ export class EngineApp {
   }
 
   async openPauseMenu(): Promise<void> {
-    if (!this.ui || this.fsm.getMode() !== 'EXPLORE') return;
-    this.sceneManager?.getActive()?.mover.setEnabled(false, { snapToIdle: false });
-    this.ui.setInteractPrompt(null);
+    const mode = this.fsm.getMode();
+    if (!this.ui || (mode !== 'EXPLORE' && mode !== 'DIALOGUE')) return;
+    this.pauseReturnMode = mode;
+    if (mode === 'EXPLORE') {
+      this.sceneManager?.getActive()?.mover.setEnabled(false, { snapToIdle: false });
+      this.ui.setInteractPrompt(null);
+    }
     this.fsm.transition('PAUSED');
     const saves = await this.saves.listSaves();
     this.ui.pauseMenu.open(this.settings, saves);
@@ -342,13 +454,16 @@ export class EngineApp {
   resumeFromPause(): void {
     if (!this.ui || this.fsm.getMode() !== 'PAUSED') return;
     this.ui.pauseMenu.close();
-    this.fsm.transition('EXPLORE');
-    this.sceneManager?.getActive()?.mover.setEnabled(true);
-    this.refreshInteractPrompt();
+    const targetMode = this.pauseReturnMode;
+    this.fsm.transition(targetMode);
+    if (targetMode === 'EXPLORE') {
+      this.sceneManager?.getActive()?.mover.setEnabled(true);
+      this.refreshInteractPrompt();
+    }
   }
 
   async saveToSlot(slotId: number | 'autosave'): Promise<void> {
-    if (this.playerSprite) {
+    if (this.sceneManager?.getActive() && this.playerSprite) {
       const pos = this.playerSprite.getPosition();
       this.state.setPlayerState(pos.x, pos.z, this.playerSprite.getFacing());
     }
@@ -484,6 +599,48 @@ export class EngineApp {
     return parsed;
   }
 
+  private async preloadScriptAssets(statements: readonly DialogueStatement[]): Promise<void> {
+    if (typeof Image === 'undefined') return;
+    const refs = extractScriptAssets(statements);
+    const urls = new Set<string>();
+
+    for (const { character, pose } of refs.portraits) {
+      const url =
+        this.manifest.portraits?.[character]?.[pose] ??
+        this.manifest.portraits?.[character]?.default;
+      if (url) urls.add(url);
+    }
+
+    for (const cgId of refs.cgIds) {
+      const entry = this.manifest.cgs?.[cgId];
+      const url = typeof entry === 'string' ? entry : entry?.url;
+      if (url) urls.add(url);
+    }
+
+    await Promise.all(Array.from(urls).map((url) => this.preloadImage(url)));
+  }
+
+  private preloadImage(url: string): Promise<void> {
+    if (this.preloadedImageUrls.has(url) || typeof Image === 'undefined') {
+      return Promise.resolve();
+    }
+    return new Promise<void>((resolve) => {
+      const img = new Image();
+      let settled = false;
+      const done = (ok: boolean): void => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (ok) this.preloadedImageUrls.add(url);
+        resolve();
+      };
+      const timer = setTimeout(() => done(false), 2500);
+      img.onload = () => done(true);
+      img.onerror = () => done(false);
+      img.src = url;
+    });
+  }
+
   private refreshInteractPrompt(): void {
     if (!this.ui) return;
     if (this.fsm.getMode() !== 'EXPLORE' || !this.lastNearestTarget) {
@@ -500,7 +657,13 @@ export class EngineApp {
     const mode = this.fsm.getMode();
 
     if (e.code === 'Escape' && !e.repeat) {
-      if (mode === 'EXPLORE') {
+      if (mode === 'DIALOGUE' && this.ui?.dialogue.isUiHidden()) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        this.ui.dialogue.setUiHidden(false);
+        return;
+      }
+      if (mode === 'EXPLORE' || mode === 'DIALOGUE') {
         e.preventDefault();
         e.stopImmediatePropagation();
         void this.openPauseMenu();
@@ -509,6 +672,13 @@ export class EngineApp {
         e.stopImmediatePropagation();
         this.resumeFromPause();
       }
+      return;
+    }
+
+    if (mode === 'DIALOGUE' && e.code === 'KeyH' && !e.repeat) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      this.ui?.dialogue.toggleUiHidden();
       return;
     }
 
@@ -534,14 +704,22 @@ export class EngineApp {
       this.state.addPlaytime(dt);
     }
 
+    if (mode === 'DIALOGUE') {
+      this.dialogueRunner?.update(dt);
+      this.ui?.dialogue.update(dt);
+    }
+
+    this.fpsAccum += rawDt;
+    this.fpsFrames += 1;
+    if (this.fpsAccum >= 0.4) {
+      this.fpsDisplay = Math.round(this.fpsFrames / Math.max(0.001, this.fpsAccum));
+      this.fpsAccum = 0;
+      this.fpsFrames = 0;
+    }
+
     if (active && this.playerSprite) {
       if (mode === 'EXPLORE') {
         active.mover.update(dt);
-      }
-
-      if (mode === 'DIALOGUE') {
-        this.dialogueRunner?.update(dt);
-        this.ui?.dialogue.update(dt);
       }
 
       if (mode !== 'PAUSED' && mode !== 'LOADING') {
@@ -560,14 +738,6 @@ export class EngineApp {
 
       this.viewport.renderer.render(this.threeScene, active.fixedCamera.camera);
 
-      this.fpsAccum += rawDt;
-      this.fpsFrames += 1;
-      if (this.fpsAccum >= 0.4) {
-        this.fpsDisplay = Math.round(this.fpsFrames / Math.max(0.001, this.fpsAccum));
-        this.fpsAccum = 0;
-        this.fpsFrames = 0;
-      }
-
       const pos = this.playerSprite.getPosition();
       this.onStatsTick?.({
         x: pos.x,
@@ -576,6 +746,15 @@ export class EngineApp {
         fps: this.fpsDisplay,
         mode,
         environmentId: active.environmentId,
+      });
+    } else if (this.state.environmentId) {
+      this.onStatsTick?.({
+        x: this.state.playerX,
+        z: this.state.playerZ,
+        facing: this.state.playerFacing,
+        fps: this.fpsDisplay,
+        mode,
+        environmentId: this.state.environmentId,
       });
     }
   };

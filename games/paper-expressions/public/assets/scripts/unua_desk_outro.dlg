@@ -1,0 +1,21 @@
+# scripts/unua_desk_outro.dlg
+# Evening VN epilogue beat: full-screen Unua desk CG + Chloe/Unua dialogue
+@cg unua_desk_chloe fade
+@box default
+
+say _ unua_desk_narration_01
+say unua unua_desk_unua_01
+
+@portrait left chloe surprised
+@portrait right unua default
+say chloe unua_desk_chloe_01
+
+@portrait left chloe nervous
+say chloe unua_desk_chloe_02
+say unua unua_desk_unua_02
+
+@portrait left chloe soft_smile
+say chloe unua_desk_chloe_03
+
+@transition main_studio spawn_start
+@end

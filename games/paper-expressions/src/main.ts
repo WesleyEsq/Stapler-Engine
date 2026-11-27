@@ -50,9 +50,10 @@ async function bootstrap(): Promise<void> {
   });
 
   btnPause?.addEventListener('click', () => {
-    if (app.getMode() === 'EXPLORE') {
+    const mode = app.getMode();
+    if (mode === 'EXPLORE' || mode === 'DIALOGUE') {
       void app.openPauseMenu();
-    } else if (app.getMode() === 'PAUSED') {
+    } else if (mode === 'PAUSED') {
       app.resumeFromPause();
     }
   });

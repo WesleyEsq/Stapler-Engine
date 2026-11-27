@@ -1,9 +1,12 @@
 # scripts/hallway_notice.dlg
 @box thought
-@portrait left unua default
+@portrait left chloe sleepy
 @if checked_terminal == true
-  say unua hallway_ready_01
+  @portrait left chloe soft_smile
+  say chloe hallway_ready_01
+  @transition vn_unua_desk_outro
 @else
-  say unua hallway_not_ready_01
+  @portrait left chloe nervous
+  say chloe hallway_not_ready_01
 @endif
 @end

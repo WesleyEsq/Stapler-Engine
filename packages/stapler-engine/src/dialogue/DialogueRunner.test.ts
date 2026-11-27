@@ -81,4 +81,44 @@ describe('DialogueRunner', () => {
     runner.advance();
     expect(runner.isActive()).toBe(false);
   });
+
+  it('tracks @cg state, clears CGs, invokes onBgm, and emits VN-only @transition without spawnId', () => {
+    const state = new GameState();
+    const bgmSpy = vi.fn();
+    const completeSpy = vi.fn();
+    const runner = new DialogueRunner(state, {
+      onBgm: bgmSpy,
+      onComplete: completeSpy,
+    });
+
+    const script = parseDialogueScript(`
+      @bgm chill_snow 0.6
+      @cg bus_stop fade
+      say _ opening_narration
+      @cg unua_desk cut
+      say chloe desk_line
+      @cg clear cut
+      @bgm stop
+      say chloe after_cg
+      @transition vn_epilogue
+    `);
+
+    runner.start(script);
+    expect(bgmSpy).toHaveBeenCalledWith({ trackId: 'chill_snow', fadeSec: 0.6 });
+    expect(runner.getSnapshot().cg).toEqual({ id: 'bus_stop', transition: 'fade' });
+
+    runner.advance();
+    expect(runner.getSnapshot().cg).toEqual({ id: 'unua_desk', transition: 'cut' });
+
+    runner.advance();
+    expect(runner.getSnapshot().cg).toBeNull();
+    expect(runner.getSnapshot().cgClearTransition).toBe('cut');
+    expect(bgmSpy).toHaveBeenCalledWith({ trackId: null, fadeSec: undefined });
+
+    runner.advance();
+    expect(runner.isActive()).toBe(false);
+    expect(completeSpy).toHaveBeenCalledWith({
+      transition: { environmentId: 'vn_epilogue', spawnId: undefined, facing: undefined },
+    });
+  });
 });

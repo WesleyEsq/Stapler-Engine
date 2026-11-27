@@ -5,10 +5,10 @@ export const MAX_SIMULATION_DT = 0.05;
 
 const ALLOWED_TRANSITIONS: Record<EngineMode, readonly EngineMode[]> = {
   BOOT: ['LOADING'],
-  LOADING: ['EXPLORE'],
+  LOADING: ['EXPLORE', 'DIALOGUE'],
   EXPLORE: ['DIALOGUE', 'PAUSED', 'LOADING'],
-  DIALOGUE: ['EXPLORE', 'LOADING'],
-  PAUSED: ['EXPLORE', 'LOADING'],
+  DIALOGUE: ['EXPLORE', 'PAUSED', 'LOADING'],
+  PAUSED: ['EXPLORE', 'DIALOGUE', 'LOADING'],
 };
 
 /** Clamps raw frame delta time to `<= 0.05s` so tab-switches never tunnel collisions. */

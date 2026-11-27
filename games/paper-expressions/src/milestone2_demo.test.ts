@@ -12,6 +12,8 @@ import { PAPER_EXPRESSIONS_MANIFEST } from './manifest';
 
 import mainStudioRaw from '../public/assets/maps/milestone2_demo.tmj?raw';
 import studyClosetRaw from '../public/assets/maps/study_closet.tmj?raw';
+import busStopIntroDlg from '../public/assets/scripts/bus_stop_intro.dlg?raw';
+import unuaDeskOutroDlg from '../public/assets/scripts/unua_desk_outro.dlg?raw';
 import assistantDlg from '../public/assets/scripts/assistant_greeting.dlg?raw';
 import studyDoorDlg from '../public/assets/scripts/study_door.dlg?raw';
 import studyTerminalDlg from '../public/assets/scripts/study_terminal.dlg?raw';
@@ -38,6 +40,8 @@ describe('Paper expressions content integrity', () => {
   };
 
   const scriptsById: Record<string, string> = {
+    bus_stop_intro: busStopIntroDlg,
+    unua_desk_outro: unuaDeskOutroDlg,
     assistant_greeting: assistantDlg,
     study_door: studyDoorDlg,
     study_terminal: studyTerminalDlg,
@@ -55,7 +59,7 @@ describe('Paper expressions content integrity', () => {
       expect(envCfg).toBeDefined();
 
       // Shadow caster budget check (<= 2)
-      const shadowCount = [...envCfg!.lights, ...parsed.lights].filter((l) => l.castShadow).length;
+      const shadowCount = [...(envCfg!.lights ?? []), ...parsed.lights].filter((l) => l.castShadow).length;
       expect(shadowCount).toBeLessThanOrEqual(2);
 
       // Every NPC patrolPath must exist in the same map and spriteId must exist in manifest
@@ -92,36 +96,66 @@ describe('Paper expressions content integrity', () => {
     expect(path.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('validates every .dlg script parses cleanly and all keys/speakers/transitions exist across all locales', () => {
+  it('validates every .dlg script parses cleanly and all keys/speakers/portraits/CGs/transitions exist across all locales', () => {
     for (const [scriptId, source] of Object.entries(scriptsById)) {
       expect(PAPER_EXPRESSIONS_MANIFEST.scripts?.[scriptId]).toBeDefined();
       const statements = collectStatements(parseDialogueScript(source));
 
       for (const stmt of statements) {
         if (stmt.type === 'say') {
+          const isNameless = stmt.speaker === '_' || stmt.speaker === 'none';
           for (const [lang, bundle] of Object.entries(locales)) {
-            expect(bundle.speakers[stmt.speaker], `Missing speaker "${stmt.speaker}" in ${lang}`).toBeDefined();
+            if (!isNameless) {
+              expect(bundle.speakers[stmt.speaker], `Missing speaker "${stmt.speaker}" in ${lang}`).toBeDefined();
+            }
             expect(bundle.lines[stmt.lineKey], `Missing line "${stmt.lineKey}" in ${lang}`).toBeDefined();
           }
         }
-        if (stmt.type === 'transition') {
-          const targetMap = mapsByEnv[stmt.environmentId as keyof typeof mapsByEnv];
-          expect(targetMap, `Unknown transition env "${stmt.environmentId}" in ${scriptId}`).toBeDefined();
+        if (stmt.type === 'portrait' && stmt.character !== null && stmt.pose !== null) {
+          const charPortraits = PAPER_EXPRESSIONS_MANIFEST.portraits?.[stmt.character];
+          expect(charPortraits, `Unknown portrait character "${stmt.character}" in ${scriptId}`).toBeDefined();
           expect(
-            targetMap.spawns[stmt.spawnId],
-            `Unknown spawn "${stmt.spawnId}" in "${stmt.environmentId}"`,
+            charPortraits?.[stmt.pose] ?? charPortraits?.default,
+            `Unknown portrait pose "${stmt.character}.${stmt.pose}" in ${scriptId}`,
           ).toBeDefined();
+        }
+        if (stmt.type === 'cg' && stmt.cgId !== null) {
+          expect(
+            PAPER_EXPRESSIONS_MANIFEST.cgs?.[stmt.cgId],
+            `Unknown CG "${stmt.cgId}" in ${scriptId}`,
+          ).toBeDefined();
+        }
+        if (stmt.type === 'transition') {
+          const targetEnv = PAPER_EXPRESSIONS_MANIFEST.environments[stmt.environmentId];
+          expect(targetEnv, `Unknown transition env "${stmt.environmentId}" in ${scriptId}`).toBeDefined();
+          if (targetEnv?.kind === 'vn') {
+            expect(targetEnv.entryScriptId).toBeDefined();
+            expect(scriptsById[targetEnv.entryScriptId!]).toBeDefined();
+          } else {
+            const targetMap = mapsByEnv[stmt.environmentId as keyof typeof mapsByEnv];
+            expect(targetMap, `Missing map for explore env "${stmt.environmentId}" in ${scriptId}`).toBeDefined();
+            if (stmt.spawnId) {
+              expect(
+                targetMap.spawns[stmt.spawnId],
+                `Unknown spawn "${stmt.spawnId}" in "${stmt.environmentId}"`,
+              ).toBeDefined();
+            }
+          }
         }
       }
     }
 
-    // Every manifest environment titleKey must exist in all locales
+    // Every manifest environment titleKey must exist in all locales, and VN envs must reference valid scripts
     for (const env of Object.values(PAPER_EXPRESSIONS_MANIFEST.environments)) {
       for (const [lang, bundle] of Object.entries(locales)) {
         expect(
           bundle.environments?.[env.titleKey],
           `Missing environment title "${env.titleKey}" in ${lang}`,
         ).toBeDefined();
+      }
+      if (env.kind === 'vn') {
+        expect(env.entryScriptId, `VN env "${env.id}" missing entryScriptId`).toBeDefined();
+        expect(scriptsById[env.entryScriptId!], `Missing script "${env.entryScriptId}"`).toBeDefined();
       }
     }
   });

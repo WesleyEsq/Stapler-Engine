@@ -1,4 +1,4 @@
-import type { FacingDirection, FlagValue, PortraitSlot } from '../types/contracts';
+import type { CgTransitionKind, FacingDirection, FlagValue, PortraitSlot } from '../types/contracts';
 
 export type DialogueStatement =
   | {
@@ -7,6 +7,18 @@ export type DialogueStatement =
       character: string | null;
       pose: string | null;
       facing?: 'left' | 'right';
+      line: number;
+    }
+  | {
+      type: 'cg';
+      cgId: string | null;
+      transition: CgTransitionKind;
+      line: number;
+    }
+  | {
+      type: 'bgm';
+      trackId: string | null;
+      fadeSec?: number;
       line: number;
     }
   | { type: 'box'; style: string; line: number }
@@ -26,12 +38,19 @@ export type DialogueStatement =
   | {
       type: 'transition';
       environmentId: string;
-      spawnId: string;
+      spawnId?: string;
       facing?: FacingDirection;
       line: number;
     }
   | { type: 'wait'; seconds: number; line: number }
   | { type: 'end'; line: number };
+
+export interface ExtractedScriptAssets {
+  portraits: Array<{ character: string; pose: string }>;
+  cgIds: string[];
+  bgmIds: string[];
+  transitions: Array<{ environmentId: string; spawnId?: string }>;
+}
 
 export class ScriptParseError extends Error {
   readonly line: number;
@@ -146,6 +165,58 @@ export function parseDialogueScript(source: string): DialogueStatement[] {
         break;
       }
 
+      case '@cg': {
+        const arg1 = tokens[1];
+        const transitionRaw = tokens[2];
+        if (!arg1 || tokens.length > 3) {
+          throw new ScriptParseError(
+            lineNum,
+            'Expected "@cg <cgId> [fade|cut]" or "@cg clear [fade|cut]".',
+          );
+        }
+        let transition: CgTransitionKind = 'fade';
+        if (transitionRaw !== undefined) {
+          if (transitionRaw !== 'fade' && transitionRaw !== 'cut') {
+            throw new ScriptParseError(
+              lineNum,
+              `Invalid @cg transition "${transitionRaw}"; expected fade or cut.`,
+            );
+          }
+          transition = transitionRaw;
+        }
+        const cgId = arg1 === 'clear' || arg1 === 'none' ? null : arg1;
+        append({ type: 'cg', cgId, transition, line: lineNum });
+        break;
+      }
+
+      case '@bgm': {
+        const arg1 = tokens[1];
+        const fadeRaw = tokens[2];
+        if (!arg1 || tokens.length > 3) {
+          throw new ScriptParseError(
+            lineNum,
+            'Expected "@bgm <trackId> [fadeSec]" or "@bgm stop".',
+          );
+        }
+        if (arg1 === 'stop' || arg1 === 'clear' || arg1 === 'none') {
+          if (tokens.length !== 2) {
+            throw new ScriptParseError(lineNum, 'Expected "@bgm stop".');
+          }
+          append({ type: 'bgm', trackId: null, line: lineNum });
+          break;
+        }
+        let fadeSec: number | undefined;
+        if (fadeRaw !== undefined) {
+          const parsed = Number(fadeRaw);
+          if (!Number.isFinite(parsed) || parsed < 0) {
+            throw new ScriptParseError(lineNum, `Invalid @bgm fade duration "${fadeRaw}".`);
+          }
+          fadeSec = parsed;
+        }
+        append({ type: 'bgm', trackId: arg1, fadeSec, line: lineNum });
+        break;
+      }
+
       case '@box': {
         const style = tokens[1];
         if (!style || tokens.length !== 2) {
@@ -228,10 +299,10 @@ export function parseDialogueScript(source: string): DialogueStatement[] {
         const environmentId = tokens[1];
         const spawnId = tokens[2];
         const facingRaw = tokens[3];
-        if (!environmentId || !spawnId || tokens.length > 4) {
+        if (!environmentId || tokens.length > 4) {
           throw new ScriptParseError(
             lineNum,
-            'Expected "@transition <environmentId> <spawnId> [facing]".',
+            'Expected "@transition <environmentId> [spawnId] [facing]".',
           );
         }
         let facing: FacingDirection | undefined;
@@ -276,6 +347,65 @@ export function parseDialogueScript(source: string): DialogueStatement[] {
   }
 
   return root;
+}
+
+/**
+ * Recursively collects unique portraits, CG IDs, BGM track IDs, and transition
+ * targets referenced anywhere in a parsed `.dlg` AST (including inside `@if`/`@else`
+ * branches) for runtime preloading and automated content-integrity validation.
+ */
+export function extractScriptAssets(statements: readonly DialogueStatement[]): ExtractedScriptAssets {
+  const portraitSeen = new Set<string>();
+  const portraits: Array<{ character: string; pose: string }> = [];
+  const cgSet = new Set<string>();
+  const bgmSet = new Set<string>();
+  const transitions: Array<{ environmentId: string; spawnId?: string }> = [];
+
+  const visit = (list: readonly DialogueStatement[]): void => {
+    for (const stmt of list) {
+      switch (stmt.type) {
+        case 'portrait': {
+          if (stmt.character !== null && stmt.pose !== null) {
+            const key = `${stmt.character}::${stmt.pose}`;
+            if (!portraitSeen.has(key)) {
+              portraitSeen.add(key);
+              portraits.push({ character: stmt.character, pose: stmt.pose });
+            }
+          }
+          break;
+        }
+        case 'cg': {
+          if (stmt.cgId !== null) {
+            cgSet.add(stmt.cgId);
+          }
+          break;
+        }
+        case 'bgm': {
+          if (stmt.trackId !== null) {
+            bgmSet.add(stmt.trackId);
+          }
+          break;
+        }
+        case 'transition': {
+          transitions.push({ environmentId: stmt.environmentId, spawnId: stmt.spawnId });
+          break;
+        }
+        case 'if': {
+          visit(stmt.thenBranch);
+          visit(stmt.elseBranch);
+          break;
+        }
+      }
+    }
+  };
+
+  visit(statements);
+  return {
+    portraits,
+    cgIds: Array.from(cgSet),
+    bgmIds: Array.from(bgmSet),
+    transitions,
+  };
 }
 
 function stripInlineComment(line: string): string {

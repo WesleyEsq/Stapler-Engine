@@ -166,6 +166,9 @@ export class SceneManager {
     if (!envConfig.mapUrl) {
       throw new Error(`Environment "${environmentId}" is missing required mapUrl.`);
     }
+    if (!envConfig.camera) {
+      throw new Error(`Environment "${environmentId}" is missing required camera config.`);
+    }
 
     const builtMap = await TileMapBuilder.loadAndBuild(envConfig.mapUrl, {
       engineConfig: this.engineConfig,
@@ -177,11 +180,12 @@ export class SceneManager {
     sceneRoot.add(builtMap.group);
 
     // 1. Configure LightingRig (manifest lights + Tiled lights)
+    const dynamicLighting = envConfig.dynamicLighting ?? true;
     const lighting = new LightingRig(this.engineConfig);
-    lighting.configure([...envConfig.lights, ...parsed.lights]);
-    lighting.setDynamicLighting(envConfig.dynamicLighting);
+    lighting.configure([...(envConfig.lights ?? []), ...parsed.lights]);
+    lighting.setDynamicLighting(dynamicLighting);
     this.threeScene.add(lighting.group);
-    this.playerSprite.setFlatLighting(!envConfig.dynamicLighting);
+    this.playerSprite.setFlatLighting(!dynamicLighting);
 
     // 2. Spawn .glb props defined in Tiled
     for (const propDef of parsed.props) {
@@ -211,7 +215,7 @@ export class SceneManager {
       if (!spec) continue;
       const sprite = await this.createPaperSpriteFromSpec(spec, 'scene', sprDef.worldHeight);
       sprite.setPosition(sprDef.x, sprDef.z);
-      sprite.setFlatLighting(!envConfig.dynamicLighting);
+      sprite.setFlatLighting(!dynamicLighting);
       sceneRoot.add(sprite.root);
       decorSprites.push(sprite);
     }
@@ -269,7 +273,7 @@ export class SceneManager {
       if (!spec) continue;
       const npcSprite = await this.createPaperSpriteFromSpec(spec, 'scene');
       npcSprite.setPosition(npcDef.x, npcDef.z);
-      npcSprite.setFlatLighting(!envConfig.dynamicLighting);
+      npcSprite.setFlatLighting(!dynamicLighting);
       sceneRoot.add(npcSprite.root);
       npcSprites.push(npcSprite);
 

@@ -4,7 +4,7 @@ export const PAPER_EXPRESSIONS_MANIFEST: GameManifest = {
   gameId: 'paper_expressions',
   defaultLocale: 'en',
   supportedLocales: ['en', 'es'],
-  initialEnvironmentId: 'main_studio',
+  initialEnvironmentId: 'vn_bus_stop_intro',
   initialSpawnId: 'spawn_start',
   playerSpriteId: 'chloe',
   maxConcurrentSfx: 8,
@@ -36,6 +36,9 @@ export const PAPER_EXPRESSIONS_MANIFEST: GameManifest = {
     portraitOverlap: '54px',
     portraitInactiveBrightness: 0.42,
     portraitDefaultFacing: 'right',
+    cgDefaultFit: 'contain',
+    cgBackdropColor: '#0e1017',
+    cgTransitionMs: 360,
   },
   sprites: {
     chloe: {
@@ -86,7 +89,12 @@ export const PAPER_EXPRESSIONS_MANIFEST: GameManifest = {
   },
   portraits: {
     chloe: {
-      default: '/assets/sprites/chloe.svg',
+      default: '/assets/portraits/chloe_sleepy.svg',
+      sleepy: '/assets/portraits/chloe_sleepy.svg',
+      neutral: '/assets/portraits/chloe_neutral.svg',
+      nervous: '/assets/portraits/chloe_nervous.svg',
+      surprised: '/assets/portraits/chloe_surprised.svg',
+      soft_smile: '/assets/portraits/chloe_soft_smile.svg',
     },
     unua: {
       default: '/assets/sprites/unua.svg',
@@ -95,7 +103,19 @@ export const PAPER_EXPRESSIONS_MANIFEST: GameManifest = {
       default: '/assets/sprites/unua.svg',
     },
   },
+  cgs: {
+    chloe_bus_stop: {
+      url: '/assets/cgs/cg_chloe_bus_stop.png',
+      fit: 'contain',
+    },
+    unua_desk_chloe: {
+      url: '/assets/cgs/cg_unua_desk_chloe.png',
+      fit: 'contain',
+    },
+  },
   scripts: {
+    bus_stop_intro: '/assets/scripts/bus_stop_intro.dlg',
+    unua_desk_outro: '/assets/scripts/unua_desk_outro.dlg',
     assistant_greeting: '/assets/scripts/assistant_greeting.dlg',
     study_door: '/assets/scripts/study_door.dlg',
     study_terminal: '/assets/scripts/study_terminal.dlg',
@@ -107,6 +127,22 @@ export const PAPER_EXPRESSIONS_MANIFEST: GameManifest = {
   },
   audio: {},
   environments: {
+    vn_bus_stop_intro: {
+      id: 'vn_bus_stop_intro',
+      titleKey: 'env_vn_bus_stop_intro',
+      kind: 'vn',
+      entryScriptId: 'bus_stop_intro',
+      nextEnvironmentId: 'main_studio',
+      nextSpawnId: 'spawn_start',
+    },
+    vn_unua_desk_outro: {
+      id: 'vn_unua_desk_outro',
+      titleKey: 'env_vn_unua_desk_outro',
+      kind: 'vn',
+      entryScriptId: 'unua_desk_outro',
+      nextEnvironmentId: 'main_studio',
+      nextSpawnId: 'spawn_start',
+    },
     main_studio: {
       id: 'main_studio',
       titleKey: 'env_main_studio',

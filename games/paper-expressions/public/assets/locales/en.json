@@ -26,14 +26,28 @@
     "label_hallway_exit": "Hallway Threshold"
   },
   "environments": {
+    "env_vn_bus_stop_intro": "Bus Stop — Morning",
+    "env_vn_unua_desk_outro": "Professor Unua's Desk — Evening",
     "env_main_studio": "Main Studio",
     "env_study_closet": "Study Alcove"
   },
   "speakers": {
+    "chloe": "Chloe",
     "unua": "Professor Unua",
     "assistant": "Lab Assistant"
   },
   "lines": {
+    "bus_stop_narration_01": "Cold equatorial morning air settles over the empty avenue.{w=0.35} Only the distant hum of a late bus breaks the silence.",
+    "bus_stop_narration_02": "Press H or right-click at any time to hide the dialogue box and view the CG, or press Esc to pause and switch languages.",
+    "bus_stop_chloe_01": "...Battery at eighty-four percent.{w=0.35} Still feels too early to pretend to be awake.",
+    "bus_stop_chloe_02": "Wait—if I miss the next bus, I'll walk into compilers class late again.{p} Keep it together, Chloe.",
+    "bus_stop_chloe_03": "Deep breath.{w=0.25} Even if I don't technically need oxygen, it helps blend in.",
+    "unua_desk_narration_01": "Light snow drifts past the apartment window while papers pile around the green desk lamp.",
+    "unua_desk_unua_01": "You're back late, Chloe.{w=0.35} Did you make it through the whole day without rattling a single cable loose?",
+    "unua_desk_chloe_01": "Ah—Professor Unua!{w=0.25} You're still revising the blueprints?",
+    "unua_desk_chloe_02": "Everything went fine, mostly...{p} Nobody noticed anything strange.",
+    "unua_desk_unua_02": "Good.{w=0.3} Sit down for a diagnostics sweep before your joints freeze up.",
+    "unua_desk_chloe_03": "Okay.{w=0.25} It's nice to be somewhere warm again.",
     "assistant_intro_01": "Professor! The diagnostics terminal inside the study room is blinking again.",
     "unua_intro_02": "...Great.{w=0.45} I'll go through the study door...{p} and check the logs myself.",
     "assistant_repeat_01": "The study door is just around the interior partition wall on the right.",

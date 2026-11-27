@@ -1,4 +1,4 @@
-import type { FacingDirection, PortraitSlot } from '../types/contracts';
+import type { CgTransitionKind, FacingDirection, PortraitSlot } from '../types/contracts';
 import type { GameState } from '../core/GameState';
 import type { DialogueStatement } from './ScriptParser';
 
@@ -6,6 +6,11 @@ export interface ActivePortrait {
   character: string;
   pose: string;
   facing: 'left' | 'right';
+}
+
+export interface ActiveCg {
+  id: string;
+  transition: CgTransitionKind;
 }
 
 export interface ActiveDialogueLine {
@@ -16,7 +21,7 @@ export interface ActiveDialogueLine {
 
 export interface DialogueTransitionRequest {
   environmentId: string;
-  spawnId: string;
+  spawnId?: string;
   facing?: FacingDirection;
 }
 
@@ -26,12 +31,15 @@ export interface DialogueStateSnapshot {
   boxStyle: string;
   currentLine: ActiveDialogueLine | null;
   portraits: Partial<Record<PortraitSlot, ActivePortrait>>;
+  cg: ActiveCg | null;
+  cgClearTransition: CgTransitionKind;
 }
 
 export interface DialogueRunnerCallbacks {
   onStateChanged?: (snapshot: DialogueStateSnapshot) => void;
   onSfx?: (soundId: string) => void;
   onVoice?: (voiceId: string) => void;
+  onBgm?: (request: { trackId: string | null; fadeSec?: number }) => void;
   onComplete?: (result: { transition?: DialogueTransitionRequest }) => void;
 }
 
@@ -55,6 +63,8 @@ export class DialogueRunner {
   private boxStyle = 'default';
   private currentLine: ActiveDialogueLine | null = null;
   private portraits: Partial<Record<PortraitSlot, ActivePortrait>> = {};
+  private cg: ActiveCg | null = null;
+  private cgClearTransition: CgTransitionKind = 'fade';
   private pendingTransition: DialogueTransitionRequest | undefined;
 
   constructor(gameState: GameState, callbacks: DialogueRunnerCallbacks = {}) {
@@ -77,6 +87,8 @@ export class DialogueRunner {
         ...(this.portraits.center ? { center: { ...this.portraits.center } } : {}),
         ...(this.portraits.right ? { right: { ...this.portraits.right } } : {}),
       },
+      cg: this.cg ? { ...this.cg } : null,
+      cgClearTransition: this.cgClearTransition,
     };
   }
 
@@ -87,6 +99,8 @@ export class DialogueRunner {
     this.boxStyle = 'default';
     this.currentLine = null;
     this.portraits = {};
+    this.cg = null;
+    this.cgClearTransition = 'fade';
     this.pendingTransition = undefined;
     this.stepUntilPause();
   }
@@ -115,6 +129,8 @@ export class DialogueRunner {
     this.waitRemaining = 0;
     this.currentLine = null;
     this.portraits = {};
+    this.cg = null;
+    this.cgClearTransition = 'cut';
     this.pendingTransition = undefined;
     this.callbacks.onStateChanged?.(this.getSnapshot());
   }
@@ -143,6 +159,19 @@ export class DialogueRunner {
               facing: stmt.facing ?? defaultFacing,
             };
           }
+          break;
+        }
+        case 'cg': {
+          if (stmt.cgId === null) {
+            this.cg = null;
+            this.cgClearTransition = stmt.transition;
+          } else {
+            this.cg = { id: stmt.cgId, transition: stmt.transition };
+          }
+          break;
+        }
+        case 'bgm': {
+          this.callbacks.onBgm?.({ trackId: stmt.trackId, fadeSec: stmt.fadeSec });
           break;
         }
         case 'box': {
@@ -214,6 +243,8 @@ export class DialogueRunner {
     this.waitRemaining = 0;
     this.currentLine = null;
     this.portraits = {};
+    this.cg = null;
+    this.cgClearTransition = 'fade';
     this.pendingTransition = undefined;
     this.callbacks.onStateChanged?.(this.getSnapshot());
     this.callbacks.onComplete?.({ transition });

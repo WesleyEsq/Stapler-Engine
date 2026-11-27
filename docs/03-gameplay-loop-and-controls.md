@@ -58,33 +58,42 @@ Planned upgrade in Milestone 2 (NavGrid + Pathfinder + MovementController + NpcC
   interaction/dialogue and yield briefly if the player stands in their path.
 
 
-## 3. Engine Mode State Machine (Planned in Milestone 3)
+## 3. Engine Mode State Machine (EngineApp & ModeFsm)
 
-Once UI menus and dialogue are wired in, EngineApp will manage five modes so
-gameplay inputs never leak into menus or loading screens:
+EngineApp manages five modes so gameplay inputs never leak into menus or loading screens:
 
   BOOT      Initial startup: load persistent assets and initial scene.
-  LOADING   Scene transition: show LoadingView, dispose old scene, load new one.
+  LOADING   Scene transition: show LoadingView, dispose old scene, load new one
+            (transitions into EXPLORE for 3D rooms, or directly into DIALOGUE
+            for VN-only scenes / room entry cutscenes).
   EXPLORE   Normal walking: click-to-move, WASD, Spacebar interact, Esc pauses.
-  DIALOGUE  Visual novel overlay active: movement locked, click/Space advances.
-  PAUSED    Pause menu open: world paused, Resume / Settings / Save / Load UI.
+  DIALOGUE  Visual novel overlay active: movement locked, click/Space advances,
+            H or right-click hides/restores UI to view CGs, Esc pauses.
+  PAUSED    Pause menu open: world & dialogue timers paused; Resume returns to
+            whichever mode (EXPLORE or DIALOGUE) opened the menu.
 
 
-## 4. Dialogue and Localization Design (Planned in Milestone 3)
+## 4. Dialogue, CGs, VN-Only Scenes, and Localization
 
 Dialogue is rendered in an HTML/CSS overlay on top of the WebGL canvas rather
-than inside 3D textures. This keeps text razor-sharp at any resolution and makes
-responsive layouts easy.
+than inside 3D textures. This keeps text and detailed SVG portraits razor-sharp
+at any resolution and makes responsive layouts easy.
 
-Two key rules keep localization clean:
-1. .dlg script files hold only stage directions (speaker, portrait side/emotion,
-   SFX triggers, @if/@else/@set story flags, and @transition <envId> <spawnId>
-   scene warps) and string keys.
-2. Actual text lives in separate JSON files per language (locales/en.json,
-   locales/es.json).
-
-Switching language in the Pause Menu immediately resolves strings from the new
-locale file without duplicating any dialogue branching logic.
+Key features:
+1. .dlg script files hold only stage directions (`@cg <id> [fade|cut]`,
+   `@cg clear`, `@portrait <left|center|right> <char> <pose> [left|right]`,
+   `@bgm <trackId|stop>`, `@box <style>`, `@sfx`, `@voice`, `@if/@else/@set`,
+   `@wait`, and `@transition <envId> [spawnId] [facing]`) plus string keys.
+   Nameless narration uses `say _ <lineKey>` or `say none <lineKey>`.
+2. Full-screen PNG CGs/backdrops render behind the SVG portrait stage in a
+   crossfading layer (`GameManifest.cgs`), supporting both pure CG moments and
+   illustrated VN backdrops paired with detailed SVG character portraits.
+3. Environments with `kind: 'vn'` skip loading a 3D `.tmj` map, unload prior
+   scene VRAM, preload referenced CGs and portraits, and boot directly into
+   `DIALOGUE`, allowing games to interleave playable 2.5D rooms and VN chapters.
+4. Actual text lives in separate JSON files per language (locales/en.json,
+   locales/es.json); switching language in the Pause Menu updates UI and the
+   active dialogue line immediately without duplicating scripts.
 
 
 ## 5. Audio Architecture Design (Planned in Milestone 3)

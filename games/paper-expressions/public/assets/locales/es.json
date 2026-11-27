@@ -26,14 +26,28 @@
     "label_hallway_exit": "Umbral del Pasillo"
   },
   "environments": {
+    "env_vn_bus_stop_intro": "Parada de Autobús — Mañana",
+    "env_vn_unua_desk_outro": "Escritorio de la Profesora Unua — Noche",
     "env_main_studio": "Estudio Principal",
     "env_study_closet": "Cuarto de Estudio"
   },
   "speakers": {
+    "chloe": "Chloe",
     "unua": "Profesora Unua",
     "assistant": "Asistente"
   },
   "lines": {
+    "bus_stop_narration_01": "El aire frío de la mañana ecuatorial cubre la avenida vacía.{w=0.35} Solo el zumbido lejano de un autobús retrasado rompe el silencio.",
+    "bus_stop_narration_02": "Pulsa H o clic derecho en cualquier momento para ocultar el cuadro de diálogo y ver el CG, o pulsa Esc para pausar y cambiar de idioma.",
+    "bus_stop_chloe_01": "...Batería al ochenta y cuatro por ciento.{w=0.35} Sigue siendo demasiado temprano para fingir que estoy despierta.",
+    "bus_stop_chloe_02": "Espera... si pierdo el próximo autobús, volveré a llegar tarde a clase de compiladores.{p} Mantén la calma, Chloe.",
+    "bus_stop_chloe_03": "Respira hondo.{w=0.25} Aunque técnicamente no necesite oxígeno, ayuda a pasar desapercibida.",
+    "unua_desk_narration_01": "Una nieve ligera cae tras la ventana mientras los papeles se apilan alrededor de la lámpara verde del escritorio.",
+    "unua_desk_unua_01": "Llegas tarde, Chloe.{w=0.35} ¿Lograste terminar el día sin que se soltara ningún cable?",
+    "unua_desk_chloe_01": "¡Ah, Profesora Unua!{w=0.25} ¿Sigue revisando los planos?",
+    "unua_desk_chloe_02": "Todo salió bien, más o menos...{p} Nadie notó nada extraño.",
+    "unua_desk_unua_02": "Bien.{w=0.3} Siéntate para una revisión de diagnóstico antes de que se te congelen las articulaciones.",
+    "unua_desk_chloe_03": "Está bien.{w=0.25} Se siente bien volver a un lugar cálido.",
     "assistant_intro_01": "¡Profesora! La terminal de diagnóstico dentro del cuarto de estudio volvió a parpadear.",
     "unua_intro_02": "...Genial.{w=0.45} Pasaré por la puerta del estudio...{p} para revisar los registros yo misma.",
     "assistant_repeat_01": "La puerta del estudio está rodeando la pared interior a la derecha.",

@@ -48,11 +48,12 @@ export type { NpcAgentOptions, NpcUpdateContext } from './navigation/NpcControll
 export { MovementController } from './navigation/MovementController';
 export type { MovementControllerOptions } from './navigation/MovementController';
 
-export { parseDialogueScript, ScriptParseError } from './dialogue/ScriptParser';
-export type { DialogueStatement } from './dialogue/ScriptParser';
+export { parseDialogueScript, extractScriptAssets, ScriptParseError } from './dialogue/ScriptParser';
+export type { DialogueStatement, ExtractedScriptAssets } from './dialogue/ScriptParser';
 export { DialogueRunner } from './dialogue/DialogueRunner';
 export type {
   ActivePortrait,
+  ActiveCg,
   ActiveDialogueLine,
   DialogueTransitionRequest,
   DialogueStateSnapshot,

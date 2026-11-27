@@ -1,4 +1,4 @@
-import type { UiThemeConfig } from '../types/contracts';
+import type { CgAssetSpec, UiThemeConfig } from '../types/contracts';
 import type { I18nStore } from '../dialogue/I18nStore';
 import { DialogueView } from './DialogueView';
 import { LoadingView } from './LoadingView';
@@ -10,6 +10,7 @@ export interface UIOverlayOptions {
   supportedLocales: readonly string[];
   slotIds: ReadonlyArray<number | 'autosave'>;
   portraits?: Record<string, Record<string, string>>;
+  cgs?: Record<string, string | CgAssetSpec>;
   theme?: UiThemeConfig;
   onDialogueAdvance: () => void;
   pauseCallbacks: PauseMenuCallbacks;
@@ -47,7 +48,9 @@ export class UIOverlay {
       parent: this.root,
       i18n: options.i18n,
       portraits: options.portraits,
+      cgs: options.cgs,
       portraitDefaultFacing: options.theme?.portraitDefaultFacing,
+      cgDefaultFit: options.theme?.cgDefaultFit,
       onAdvanceRequested: options.onDialogueAdvance,
     });
 
@@ -92,6 +95,10 @@ export class UIOverlay {
     setVar('--stapler-portrait-height', theme.portraitHeight);
     setVar('--stapler-portrait-overlap', theme.portraitOverlap);
     setVar('--stapler-portrait-inactive-brightness', theme.portraitInactiveBrightness);
+    setVar('--stapler-cg-backdrop', theme.cgBackdropColor);
+    if (theme.cgTransitionMs !== undefined) {
+      setVar('--stapler-cg-transition-ms', `${theme.cgTransitionMs}ms`);
+    }
   }
 
   setInteractPrompt(text: string | null): void {
@@ -155,6 +162,50 @@ function ensureDefaultStyles(): void {
   background: linear-gradient(to top, rgba(16, 18, 26, 0.52), transparent 48%);
 }
 
+.stapler-dialogue-layer.has-cg {
+  background: transparent;
+}
+
+.stapler-cg-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--stapler-cg-backdrop, #0f1118);
+  opacity: 0;
+  transition: opacity var(--stapler-cg-transition-ms, 360ms) ease;
+}
+
+.stapler-cg-stage.is-active {
+  opacity: 1;
+}
+
+.stapler-cg-stage.is-cut,
+.stapler-cg-stage.is-cut .stapler-cg-img {
+  transition: none !important;
+}
+
+.stapler-cg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  opacity: 0;
+  transition: opacity var(--stapler-cg-transition-ms, 360ms) ease;
+  pointer-events: none;
+}
+
+.stapler-cg-img[data-fit='cover'] {
+  object-fit: cover;
+}
+
+.stapler-cg-img.is-visible {
+  opacity: 1;
+}
+
 .stapler-portrait-stage {
   position: relative;
   width: min(var(--stapler-box-max-width, 980px), 96%);
@@ -162,6 +213,14 @@ function ensureDefaultStyles(): void {
   margin: 0 auto calc(-1 * var(--stapler-portrait-overlap, 48px));
   pointer-events: none;
   z-index: 1;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.stapler-dialogue-layer.is-ui-hidden .stapler-portrait-stage,
+.stapler-dialogue-layer.is-ui-hidden .stapler-dialogue-box {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
 }
 
 .stapler-portrait-slot {
@@ -227,6 +286,24 @@ function ensureDefaultStyles(): void {
   transform: scaleX(-1);
 }
 
+.stapler-portrait-img.is-pose-swapped {
+  animation: stapler-pose-pop 0.18s ease-out;
+}
+
+.stapler-portrait-img[data-flip='true'].is-pose-swapped {
+  animation: stapler-pose-pop-flip 0.18s ease-out;
+}
+
+@keyframes stapler-pose-pop {
+  0% { transform: translateY(5px) scale(0.985); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes stapler-pose-pop-flip {
+  0% { transform: scaleX(-1) translateY(5px) scale(0.985); }
+  100% { transform: scaleX(-1) translateY(0) scale(1); }
+}
+
 .stapler-dialogue-box {
   position: relative;
   z-index: 3;
@@ -240,6 +317,7 @@ function ensureDefaultStyles(): void {
   border-radius: var(--stapler-box-radius, 14px);
   padding: 1.15em 1.5em 1.75em;
   box-shadow: var(--stapler-box-shadow, 0 14px 36px rgba(0, 0, 0, 0.45));
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .stapler-dialogue-speaker {

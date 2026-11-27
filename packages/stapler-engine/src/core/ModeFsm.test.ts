@@ -12,24 +12,33 @@ describe('ModeFsm, clampSimulationDt, EventBus & GameState', () => {
     const fsm = new ModeFsm(bus);
     expect(fsm.getMode()).toBe('BOOT');
 
-    // Cannot jump directly from BOOT to EXPLORE or DIALOGUE
+    // Cannot jump directly from BOOT to EXPLORE, DIALOGUE, or PAUSED
     expect(fsm.canTransition('EXPLORE')).toBe(false);
+    expect(fsm.canTransition('DIALOGUE')).toBe(false);
+    expect(fsm.canTransition('PAUSED')).toBe(false);
     expect(() => fsm.transition('EXPLORE')).toThrow(/Invalid EngineMode transition/);
 
+    // Boot directly into a VN scene (LOADING -> DIALOGUE) and pause/resume mid-dialogue
     fsm.transition('LOADING');
-    fsm.transition('EXPLORE');
     fsm.transition('DIALOGUE');
+    fsm.transition('PAUSED');
+    fsm.transition('DIALOGUE');
+
+    // Return to exploration, pause, and load a save
     fsm.transition('EXPLORE');
     fsm.transition('PAUSED');
-    fsm.transition('LOADING'); // Loading a save from Pause Menu
+    fsm.transition('LOADING');
     fsm.transition('EXPLORE');
 
-    // Cannot open PAUSED directly from DIALOGUE
-    fsm.transition('DIALOGUE');
+    // Cannot jump directly from LOADING to PAUSED
+    fsm.transition('LOADING');
     expect(() => fsm.transition('PAUSED')).toThrow(/Invalid EngineMode transition/);
 
-    expect(seen).toHaveLength(8);
+    expect(seen).toHaveLength(9);
     expect(seen[0]).toEqual({ from: 'BOOT', to: 'LOADING' });
+    expect(seen[1]).toEqual({ from: 'LOADING', to: 'DIALOGUE' });
+    expect(seen[2]).toEqual({ from: 'DIALOGUE', to: 'PAUSED' });
+    expect(seen[3]).toEqual({ from: 'PAUSED', to: 'DIALOGUE' });
   });
 
   it('clamps simulation delta time to <= 0.05s and handles negative/NaN values safely', () => {

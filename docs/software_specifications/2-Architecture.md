@@ -122,23 +122,26 @@ The engine runs a strict finite state machine (`EngineMode`) to prevent overlapp
 stateDiagram-v2
     [*] --> BOOT
     BOOT --> LOADING: Load persistent assets + initial scene
-    LOADING --> EXPLORE: Scene ready & fade-in complete
+    LOADING --> EXPLORE: 3D scene ready & fade-in complete
+    LOADING --> DIALOGUE: VN-only scene or room entryScriptId ready
     EXPLORE --> DIALOGUE: Interact with NPC/Object
     DIALOGUE --> EXPLORE: Dialogue ends
+    DIALOGUE --> PAUSED: Press Esc
+    PAUSED --> DIALOGUE: Resume (if paused from DIALOGUE)
     DIALOGUE --> LOADING: Script triggers scene transition
     EXPLORE --> LOADING: Enter door / scene trigger / load save
     EXPLORE --> PAUSED: Press Esc
-    PAUSED --> EXPLORE: Resume
+    PAUSED --> EXPLORE: Resume (if paused from EXPLORE)
     PAUSED --> LOADING: Load save slot
 ```
 
 ### Input Routing by Mode
-| Mode | Pointer / Click | WASD / Arrows | Space / Enter | Escape |
-| :--- | :--- | :--- | :--- | :--- |
-| `EXPLORE` | Move to floor tile or walk-and-interact with clicked target | Smooth float movement + collision slide | Interact with nearest target within its radius (default `1.25` tiles) | Open Pause Menu |
-| `DIALOGUE` | Complete typewriter line / advance | Ignored | Complete typewriter line / advance | Ignored (or optional skip) |
-| `PAUSED` | DOM Menu clicks only | Menu navigation | Confirm | Resume (`EXPLORE`) |
-| `LOADING` | Blocked | Blocked | Blocked | Blocked |
+| Mode | Pointer / Click | WASD / Arrows | Space / Enter | H / Right-Click | Escape |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `EXPLORE` | Move to floor tile or walk-and-interact with clicked target | Smooth float movement + collision slide | Interact with nearest target within its radius (default `1.25` tiles) | — | Open Pause Menu |
+| `DIALOGUE` | Complete typewriter line / advance (or restore hidden UI) | Ignored | Complete typewriter line / advance (or restore hidden UI) | Hide / restore dialogue UI to inspect CG | Restore hidden UI, or open Pause Menu |
+| `PAUSED` | DOM Menu clicks only | Menu navigation | Confirm | — | Resume previous mode (`EXPLORE` or `DIALOGUE`) |
+| `LOADING` | Blocked | Blocked | Blocked | Blocked | Blocked |
 
 ### Environment Transition Sequence
 1. Switch mode to `LOADING`; fade in HTML `LoadingView` animation.
@@ -267,7 +270,7 @@ say ada campus_ada_02
 @end
 ```
 
-Supported directives: `@portrait <left|center|right> <character> <pose> [left|right]`, `@box <styleName>` (sets `data-box-style` on the dialogue box so games can theme variants like `default`, `thought`, or `system` via CSS alongside `GameManifest.uiTheme`), `@sfx <id>`, `@voice <id>`, `say <speaker> <lineKey>`, `append <speaker> <lineKey>` (appends onto the active box without clearing previous text, useful for mid-sentence portrait/SFX swaps), `@if <flag> == <value>` / `@else` / `@endif`, `@set <flag> <value>`, `@transition <envId> <spawnId> [facing]`, `@wait <seconds>`, and `@end`. Localized strings also support inline pacing tags `{p}` (click-to-continue mid-sentence) and `{w=0.4}` (timed beat).
+Supported directives: `@cg <cgId|clear> [fade|cut]` (crossfades or cuts a full-screen PNG CG/backdrop behind portraits via `GameManifest.cgs`), `@bgm <trackId|stop> [fadeSec]`, `@portrait <left|center|right> <character> <pose> [left|right]`, `@box <styleName>` (sets `data-box-style` on the dialogue box so games can theme variants like `default`, `thought`, or `system` via CSS alongside `GameManifest.uiTheme`), `@sfx <id>`, `@voice <id>`, `say <speaker|_> <lineKey>` (`_` / `none` hides the nameplate for narration), `append <speaker|_> <lineKey>` (appends onto the active box without clearing previous text, useful for mid-sentence portrait/SFX swaps), `@if <flag> == <value>` / `@else` / `@endif`, `@set <flag> <value>`, `@transition <envId> [spawnId] [facing]` (`spawnId` optional for `kind: 'vn'` scenes), `@wait <seconds>`, and `@end`. Localized strings also support inline pacing tags `{p}` (click-to-continue mid-sentence) and `{w=0.4}` (timed beat).
 
 Localized strings live in `public/assets/locales/<lang>.json`:
 ```json

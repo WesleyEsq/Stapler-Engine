@@ -203,6 +203,18 @@ export type FlagValue = boolean | number | string;
 
 export type PortraitSlot = 'left' | 'center' | 'right';
 
+export type CgFitMode = 'cover' | 'contain';
+
+export type CgTransitionKind = 'fade' | 'cut';
+
+export interface CgAssetSpec {
+  url: string;
+  fit?: CgFitMode;
+  background?: string;
+}
+
+export type EnvironmentKind = 'explore' | 'vn';
+
 export interface UserSettings {
   language: string;
   bgmVolume: number;
@@ -238,11 +250,20 @@ export interface SaveSlotData {
 export interface EnvironmentConfig {
   id: string;
   titleKey: string;
+  /** `'explore'` (default) loads a 3D Tiled room; `'vn'` runs a full-screen dialogue/CG scene with no 3D map. */
+  kind?: EnvironmentKind;
   mapUrl?: string;
   bgmId?: string;
-  dynamicLighting: boolean;
-  lights: LightConfig[];
-  camera: CameraConfig;
+  /** Required for `kind: 'vn'`; optional auto-playing cutscene script on entering an `'explore'` room. */
+  entryScriptId?: string;
+  /** Optional story flag name ensuring an `'explore'` room's `entryScriptId` only plays once. */
+  entryScriptOnceFlag?: string;
+  /** Fallback destination if a `'vn'` scene's script ends without an explicit `@transition`. */
+  nextEnvironmentId?: string;
+  nextSpawnId?: string;
+  dynamicLighting?: boolean;
+  lights?: LightConfig[];
+  camera?: CameraConfig;
 }
 
 export interface UiThemeConfig {
@@ -273,6 +294,12 @@ export interface UiThemeConfig {
   portraitInactiveBrightness?: number;
   /** Direction base portrait art faces by default so right-side portraits auto-mirror inward. */
   portraitDefaultFacing?: 'left' | 'right';
+  /** Default image fit mode for full-screen CGs (`'contain'` preserves full framing, `'cover'` fills edge-to-edge). */
+  cgDefaultFit?: CgFitMode;
+  /** Letterbox/backdrop fill behind `'contain'` CGs (default `'#0f1118'`). */
+  cgBackdropColor?: string;
+  /** Crossfade duration in milliseconds for `@cg ... fade` transitions (default `360`). */
+  cgTransitionMs?: number;
 }
 
 export interface GameManifest {
@@ -280,7 +307,7 @@ export interface GameManifest {
   defaultLocale: string;
   supportedLocales: string[];
   initialEnvironmentId: string;
-  initialSpawnId: string;
+  initialSpawnId?: string;
   playerSpriteId: string;
   maxConcurrentSfx: number;
   maxSaveSlots?: number;
@@ -294,6 +321,8 @@ export interface GameManifest {
   sprites: Record<string, SpriteAnimationSpec>;
   /** Optional map of characterId -> poseName -> portrait image/SVG URL. */
   portraits?: Record<string, Record<string, string>>;
+  /** Optional map of cgId -> image URL or CgAssetSpec for full-screen VN CGs/backdrops. */
+  cgs?: Record<string, string | CgAssetSpec>;
   /** Optional map of scriptId -> URL to .dlg script file. */
   scripts?: Record<string, string>;
   /** Optional map of localeCode -> URL to locale .json file. */
